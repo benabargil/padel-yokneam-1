@@ -1,0 +1,3051 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ליגת פאדל | החברים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --bg:#0E1A20;
+    --bg-grad:#0A3A34;
+    --panel:#152A30;
+    --panel2:#1C3941;
+    --panel3:#20444D;
+    --line-c:#2C4B53;
+    --ball:#D8EA4B;
+    --ball-dim:#8A9A38;
+    --court:#1D8A73;
+    --court-dim:#136354;
+    --clay:#E3703C;
+    --gold:#F0C24B;
+    --text:#F3F1E7;
+    --text-dim:#94ADB2;
+    --text-dim2:#5F7C82;
+    --danger:#E2543B;
+    --radius:14px;
+    --font-display:'Rajdhani',sans-serif;
+    --font-body:'Inter',sans-serif;
+    --font-mono:'Space Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% -10%, var(--bg-grad) 0%, transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  ::selection{background:var(--ball);color:#12210F;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  h1,h2,h3,h4{font-family:var(--font-display);margin:0;letter-spacing:.01em;}
+  .app-shell{max-width:820px;margin:0 auto;padding:0 16px 60px;}
+  /* ---------- Header / Nav ---------- */
+  header.topbar{
+    position:sticky;top:0;z-index:40;
+    background:rgba(14,26,32,.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-c);
+  }
+  .topbar-inner{max-width:820px;margin:0 auto;padding:14px 16px 10px;}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(145deg,var(--court),var(--court-dim));
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--ball);
+    border:1px solid rgba(216,234,75,.35);
+    flex-shrink:0;
+  }
+  .brand h1{font-size:21px;font-weight:700;color:var(--text);}
+  .brand span.sub{display:block;font-size:11px;color:var(--text-dim);font-family:var(--font-body);font-weight:500;letter-spacing:.03em;margin-top:1px;}
+  nav.tabs{display:flex;gap:6px;background:var(--panel);padding:4px;border-radius:12px;border:1px solid var(--line-c);}
+  nav.tabs button{
+    flex:1;background:transparent;border:none;color:var(--text-dim);
+    font-family:var(--font-display);font-weight:600;font-size:15px;
+    padding:9px 6px;border-radius:9px;transition:.15s;
+  }
+  nav.tabs button.active{background:var(--court);color:#EAFFF9;box-shadow:0 2px 8px rgba(29,138,115,.4);}
+  nav.tabs button:not(.active):hover{color:var(--text);background:var(--panel2);}
+
+  main{padding-top:18px;}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line-c);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .card h2{font-size:20px;margin-bottom:4px;}
+  .card h2 + p.hint{margin-top:4px;}
+  p.hint{color:var(--text-dim);font-size:13px;margin:0 0 14px;line-height:1.5;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:6px;font-weight:600;}
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%;background:var(--panel2);border:1px solid var(--line-c);color:var(--text);
+    padding:10px 12px;border-radius:9px;font-family:var(--font-body);font-size:14.5px;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--ball);outline-offset:1px;border-color:transparent;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    background:var(--court);color:#EAFFF9;border:none;font-family:var(--font-display);
+    font-weight:700;font-size:15px;padding:11px 20px;border-radius:10px;
+    transition:.15s;letter-spacing:.01em;
+  }
+  .btn:hover{filter:brightness(1.12);transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn:disabled{opacity:.35;cursor:not-allowed;filter:none;transform:none;}
+  .btn.accent{background:var(--ball);color:#1C2606;}
+  .btn.ghost{background:transparent;border:1px solid var(--line-c);color:var(--text);}
+  .btn.ghost:hover{background:var(--panel2);}
+  .btn.danger{background:var(--danger);color:#fff;}
+  .btn.sm{padding:7px 12px;font-size:13px;border-radius:8px;}
+  .btn.block{width:100%;}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;background:var(--panel2);
+    border:1px solid var(--line-c);color:var(--text);padding:9px 14px;border-radius:999px;
+    font-family:var(--font-display);font-weight:600;font-size:14.5px;transition:.15s;
+  }
+  .chip:hover{border-color:var(--text-dim2);}
+  .chip.selectable{cursor:pointer;}
+  .chip.selected{background:var(--ball);color:#1C2606;border-color:var(--ball);}
+  .chip.selected.b{background:var(--clay);color:#2B0F05;border-color:var(--clay);}
+  .chip.disabled{opacity:.3;cursor:not-allowed;}
+  .chip.player{cursor:pointer;user-select:none;}
+  .chip.player.checked{background:var(--court);border-color:var(--court);color:#EAFFF9;}
+  .divider{height:1px;background:var(--line-c);margin:16px 0;}
+  .badge{display:inline-block;background:var(--panel3);color:var(--text-dim);font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;}
+  .badge.gold{background:rgba(240,194,75,.15);color:var(--gold);}
+  .empty{text-align:center;color:var(--text-dim);padding:36px 12px;font-size:14px;}
+  .empty .big{font-size:34px;margin-bottom:6px;}
+
+  /* ---------- Home / dashboard ---------- */
+  .hero{
+    border-radius:var(--radius);padding:26px 20px;margin-bottom:16px;
+    background:
+      radial-gradient(circle at 90% 0%, rgba(216,234,75,.16), transparent 55%),
+      linear-gradient(155deg,var(--court-dim),#0F2A28 70%);
+    border:1px solid rgba(29,138,115,.4);
+    position:relative;overflow:hidden;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;opacity:.10;
+    background-image:repeating-linear-gradient(90deg, transparent, transparent 38px, var(--ball) 38px, var(--ball) 40px);
+    pointer-events:none;
+  }
+  .hero h2{font-size:26px;margin-bottom:6px;}
+  .hero p{color:var(--text-dim);font-size:14px;max-width:480px;line-height:1.6;margin:0 0 16px;}
+  .session-row{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:13px 14px;background:var(--panel2);border-radius:10px;border:1px solid var(--line-c);
+    margin-bottom:8px;cursor:pointer;transition:.15s;
+  }
+  .session-row:hover{border-color:var(--ball-dim);}
+  .session-row .num{font-family:var(--font-display);font-weight:700;font-size:17px;}
+  .session-row .meta{font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .session-row .stats{font-size:12px;color:var(--text-dim);text-align:left;}
+
+  /* ---------- Scoreboard (signature element) ---------- */
+  .scoreboard{
+    border-radius:16px;overflow:hidden;border:1px solid var(--line-c);
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    margin-bottom:16px;position:relative;
+  }
+  .scoreboard::after{
+    content:"";position:absolute;left:0;right:0;top:50%;height:2px;
+    background:repeating-linear-gradient(90deg, var(--ball) 0 10px, transparent 10px 18px);
+    opacity:.5;
+  }
+  .sb-timer{
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    padding:12px;border-bottom:1px solid var(--line-c);
+    font-family:var(--font-mono);
+  }
+  .sb-timer .time{font-size:26px;font-weight:700;letter-spacing:.04em;color:var(--ball);}
+  .sb-timer .status{font-size:11px;color:var(--text-dim);font-family:var(--font-body);}
+  .sb-pairs{display:grid;grid-template-columns:1fr 1fr;}
+  .sb-pair{padding:20px 14px;text-align:center;position:relative;}
+  .sb-pair.a{border-left:1px solid var(--line-c);}
+  .sb-pair .names{font-size:13px;color:var(--text-dim);margin-bottom:8px;font-weight:600;min-height:34px;}
+  .sb-pair .score{font-family:var(--font-mono);font-size:52px;font-weight:700;line-height:1;color:var(--text);}
+  .sb-pair .score.win{color:var(--ball);}
+  .sb-pair .deuce-tag{font-size:11px;color:var(--clay);margin-top:6px;font-weight:700;font-family:var(--font-body);}
+  .sb-pair .star{color:var(--gold);font-size:13px;margin-top:8px;}
+
+  .teams-wrap{display:flex;flex-direction:column;gap:12px;padding:0 14px 16px;}
+  .team-block{border-radius:12px;padding:12px;border:1px solid var(--line-c);background:var(--panel3);}
+  .team-block.a{border-top:3px solid var(--ball);}
+  .team-block.b{border-top:3px solid var(--clay);}
+  .team-label{font-family:var(--font-display);font-weight:700;font-size:12.5px;color:var(--text-dim);margin-bottom:8px;text-align:center;letter-spacing:.03em;}
+  .team-players{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .player-ctrl{
+    background:var(--panel2);border:1px solid var(--line-c);border-radius:12px;padding:10px;
+  }
+  .player-ctrl .pname{font-family:var(--font-display);font-weight:700;font-size:15px;margin-bottom:8px;text-align:center;}
+  .player-ctrl .pstats{text-align:center;font-size:11px;color:var(--text-dim);margin-top:8px;font-family:var(--font-mono);}
+  .pbtn{border:none;border-radius:8px;font-family:var(--font-display);font-weight:700;}
+  .pbtn.pos-main{
+    width:100%;background:var(--court);color:#EAFFF9;padding:12px 6px;font-size:14.5px;
+  }
+  .pbtn.pos-main:hover{filter:brightness(1.15);}
+  .pbtn.pos-main:disabled{opacity:.35;}
+  .err-row{display:flex;gap:6px;margin-top:7px;}
+  .pbtn.err{flex:1;padding:8px 4px;font-size:11.5px;background:transparent;}
+  .pbtn.err.net{border:1px solid var(--clay);color:var(--clay);}
+  .pbtn.err.net:hover{background:rgba(227,112,60,.12);}
+  .pbtn.err.glass{border:1px solid var(--text-dim2);color:var(--text-dim);}
+  .pbtn.err.glass:hover{background:rgba(148,173,178,.12);}
+  .pbtn:disabled{opacity:.35;cursor:not-allowed;}
+
+  .game-actions{display:flex;gap:8px;padding:0 14px 16px;}
+
+  /* ---------- Tables ---------- */
+  table.stat-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.stat-table th{
+    text-align:right;color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+    padding:6px 8px;border-bottom:1px solid var(--line-c);font-weight:600;
+  }
+  table.stat-table td{padding:9px 8px;border-bottom:1px solid rgba(44,75,83,.5);}
+  table.stat-table tr:last-child td{border-bottom:none;}
+  table.stat-table tr.top1 td:first-child{color:var(--gold);font-weight:700;}
+  .rank{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;background:var(--panel3);border-radius:6px;font-family:var(--font-mono);font-size:11px;margin-left:6px;}
+  .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:12px;}
+  .badge-card{background:var(--panel3);border:1px solid var(--line-c);border-radius:14px;padding:14px;text-align:center;}
+  .badge-emoji{font-size:32px;margin-bottom:6px;}
+  .badge-title{font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px;}
+  .badge-player{color:var(--ball);font-weight:700;font-size:14px;margin-bottom:2px;}
+  .badge-desc{color:var(--text-dim);font-size:11.5px;}
+  .pos-n{color:var(--court);font-weight:700;}
+  .neg-n{color:var(--danger);font-weight:700;}
+  .stat-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;}
+  .stat-tabs button{
+    white-space:nowrap;background:var(--panel2);border:1px solid var(--line-c);color:var(--text-dim);
+    font-family:var(--font-display);font-weight:600;font-size:13.5px;padding:7px 13px;border-radius:999px;
+  }
+  .stat-tabs button.active{background:var(--ball);color:#1C2606;border-color:var(--ball);}
+  canvas{max-width:100%;}
+  select.player-select{max-width:220px;margin-bottom:14px;}
+
+  /* summary */
+  .summary-text p{line-height:1.75;font-size:14.5px;margin:0 0 10px;}
+  .summary-text strong{color:var(--ball);}
+  .mvp-banner{
+    display:flex;align-items:center;gap:12px;background:linear-gradient(120deg, rgba(240,194,75,.18), transparent);
+    border:1px solid rgba(240,194,75,.4);border-radius:12px;padding:14px;margin-bottom:16px;
+  }
+  .mvp-banner .trophy{font-size:30px;}
+  .mvp-banner .name{font-family:var(--font-display);font-weight:700;font-size:19px;color:var(--gold);}
+  .mvp-banner .label{font-size:11px;color:var(--text-dim);}
+
+  .manual-edit-item{border:1px solid var(--line-c);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--panel2);}
+  .manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .manual-grid .field{margin-bottom:0;}
+  .footer-note{text-align:center;color:var(--text-dim2);font-size:11.5px;margin-top:30px;line-height:1.6;}
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--panel3);border:1px solid var(--ball);color:var(--text);
+    padding:10px 18px;border-radius:999px;font-size:13.5px;z-index:100;
+    box-shadow:0 6px 20px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.25s;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+  .voice-flash{
+    position:fixed;inset:0;z-index:300;background:var(--court);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;
+    opacity:0;pointer-events:none;transition:opacity .12s ease;
+  }
+  .voice-flash.show{opacity:1;}
+  .voice-flash.neg{background:var(--clay);}
+  .voice-flash.fail{background:var(--danger);}
+  .voice-flash-icon{font-size:130px;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));}
+  .series-flash{
+    position:fixed;inset:0;z-index:310;background:var(--court);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+    opacity:0;pointer-events:none;transition:opacity .15s ease;text-align:center;padding:20px;
+  }
+  .series-flash.show{opacity:1;}
+  .series-flash.decided{background:var(--gold);}
+  .series-flash-icon{font-size:110px;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));}
+  .series-flash-title{font-family:var(--font-display);font-weight:800;font-size:30px;color:#0E1A20;}
+  .series-flash-sub{font-family:var(--font-body);font-size:18px;color:#0E1A20;opacity:.85;}
+  .voice-bar{padding:0 14px 14px;}
+  .voice-bar .btn{width:100%;}
+  .voice-bar .btn.listening{background:var(--danger);color:#fff;animation:pulseListen 1.4s ease-in-out infinite;}
+  @keyframes pulseListen{0%,100%{opacity:1;}50%{opacity:.75;}}
+  .vision-box{border:1px dashed var(--line-c);border-radius:10px;padding:12px 14px;margin-top:6px;}
+  .vision-box p{font-size:12.5px;color:var(--text-dim2);margin:0;line-height:1.6;}
+  @media(max-width:480px){
+    .sb-pair .score{font-size:40px;}
+    .manual-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:360px){
+    .team-players{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div>
+        <h1>ליגת הפאדל</h1>
+        <span class="sub">מעקב מפגשים, תוצאות וסטטיסטיקה של החבר׳ה</span>
+      </div>
+    </div>
+    <nav class="tabs" id="mainTabs"></nav>
+  </div>
+</header>
+<div class="app-shell">
+  <main id="viewRoot"></main>
+  <div class="footer-note">כל הנתונים נשמרים בדפדפן שלך (localStorage) ולא נמחקים בין מפגשים.<br>מומלץ לגבות מדי פעם מתוך "עריכה ידנית → גיבוי".</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="voice-flash" id="voiceFlash"><div class="voice-flash-icon" id="voiceFlashIcon">✅</div></div>
+<div class="series-flash" id="seriesFlash">
+  <div class="series-flash-icon" id="seriesFlashIcon">🏆</div>
+  <div class="series-flash-title" id="seriesFlashTitle"></div>
+  <div class="series-flash-sub" id="seriesFlashSub"></div>
+</div>
+<div id="errBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#3a0d0d;color:#ffb4b4;padding:14px 16px;font-family:monospace;font-size:13px;direction:ltr;text-align:left;max-height:40vh;overflow:auto;border-top:3px solid #ff4d4d;white-space:pre-wrap;"></div>
+
+<script>
+window.addEventListener('error', function(e){
+  const b = document.getElementById('errBanner');
+  if(!b) return;
+  b.style.display='block';
+  b.textContent = 'שגיאה: ' + (e.message||'') + '\n' + (e.filename? (e.filename+':'+e.lineno+':'+e.colno) : '') + (e.error && e.error.stack ? ('\n'+e.error.stack) : '');
+});
+window.addEventListener('unhandledrejection', function(e){
+  const b = document.getElementById('errBanner');
+  if(!b) return;
+  b.style.display='block';
+  b.textContent = 'שגיאה (promise): ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+});
+/* ======================= STATE / STORAGE (Firebase Realtime Database, synced across everyone) ======================= */
+const STORAGE_KEY = 'padelLeagueData_v1'; // used only as a local offline cache now
+const firebaseConfig = {
+  apiKey: "AIzaSyAffq4yotO3_aCV0KPextHdYBERwHLxg8A",
+  authDomain: "padel-yokneam.firebaseapp.com",
+  databaseURL: "https://padel-yokneam-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "padel-yokneam",
+  storageBucket: "padel-yokneam.firebasestorage.app",
+  messagingSenderId: "502667316701",
+  appId: "1:502667316701:web:820d2cad6ed7f2c0e37a34",
+  measurementId: "G-FGTNHZ8867"
+};
+firebase.initializeApp(firebaseConfig);
+const dbRef = firebase.database().ref('leagueData');
+const backupsRef = firebase.database().ref('leagueBackups');
+let firebaseReady = false;
+let suppressNextRemoteEcho = false;
+let safetyBackupsList = [];
+let safetyBackupsLoading = false;
+// Snapshots the whole state to a separate Firebase path right before a destructive action (delete
+// session/match/player), so an accidental deletion by anyone in the group is always recoverable.
+// Keeps only the 10 most recent snapshots.
+function saveSafetyBackup(reason){
+  try{
+    backupsRef.push({ timestamp: Date.now(), reason, data: JSON.stringify(state) });
+    backupsRef.orderByChild('timestamp').once('value', snap=>{
+      const items = [];
+      snap.forEach(child=>{ items.push({key:child.key, timestamp:(child.val()||{}).timestamp||0}); });
+      items.sort((a,b)=>a.timestamp-b.timestamp);
+      while(items.length>10){ backupsRef.child(items.shift().key).remove(); }
+    });
+  }catch(e){ console.error('safety backup error', e); }
+}
+function loadSafetyBackups(){
+  safetyBackupsLoading = true; render();
+  backupsRef.orderByChild('timestamp').once('value', snap=>{
+    const items = [];
+    snap.forEach(child=>{ items.push(Object.assign({key:child.key}, child.val())); });
+    items.sort((a,b)=>b.timestamp-a.timestamp);
+    safetyBackupsList = items;
+    safetyBackupsLoading = false;
+    render();
+  }, err=>{ console.error('load backups error', err); safetyBackupsLoading=false; toast('שגיאה בטעינת גיבויים'); render(); });
+}
+function restoreSafetyBackup(key){
+  const entry = safetyBackupsList.find(b=>b.key===key);
+  if(!entry) return;
+  if(!confirm('לשחזר לנקודת הזמן הזו? כל שינוי שנעשה אחרי הגיבוי הזה יימחק (המצב הנוכחי יישמר כגיבוי חדש קודם, ליתר ביטחון).')) return;
+  try{
+    saveSafetyBackup('לפני שחזור ידני');
+    const data = sanitizeState(JSON.parse(entry.data));
+    state = data;
+    saveState();
+    toast('שוחזר בהצלחה מהגיבוי');
+    render();
+  }catch(e){ console.error('restore error', e); toast('שגיאה בשחזור מהגיבוי'); }
+}
+
+function defaultState(){ return { players: [], sessions: [], nextSessionNumber: 1, currentSessionId: null, genders: {}, attendancePoll: null, profiles: {} }; }
+// Firebase Realtime Database silently drops any field that is an empty array/object.
+// This restores the expected shape everywhere it could bite us, on every load (local cache or cloud).
+const EMPTY_PROFILE = { avatar:'🎾', racketBrand:'', racketModel:'', hand:'', side:'', nickname:'', catchphrase:'', since:'' };
+function sanitizeState(s){
+  if(!s || typeof s!=='object') s = {};
+  if(!Array.isArray(s.players)) s.players = [];
+  if(!Array.isArray(s.sessions)) s.sessions = [];
+  if(!s.genders || typeof s.genders!=='object') s.genders = {};
+  if(typeof s.nextSessionNumber !== 'number') s.nextSessionNumber = 1;
+  if(s.currentSessionId === undefined) s.currentSessionId = null;
+  if(s.attendancePoll === undefined) s.attendancePoll = null;
+  if(s.attendancePoll && typeof s.attendancePoll==='object'){
+    if(!s.attendancePoll.responses || typeof s.attendancePoll.responses!=='object') s.attendancePoll.responses = {};
+    if(typeof s.attendancePoll.note !== 'string') s.attendancePoll.note = '';
+  }
+  if(!s.profiles || typeof s.profiles!=='object') s.profiles = {};
+  Object.keys(s.profiles).forEach(p=>{
+    s.profiles[p] = Object.assign({}, EMPTY_PROFILE, s.profiles[p]||{});
+  });
+  s.sessions.forEach(sess=>{
+    if(!Array.isArray(sess.playersPresent)) sess.playersPresent = [];
+    if(!Array.isArray(sess.matches)) sess.matches = [];
+    sess.matches.forEach(m=>{
+      if(!Array.isArray(m.pairA)) m.pairA = m.pairA||[];
+      if(!Array.isArray(m.pairB)) m.pairB = m.pairB||[];
+      if(!Array.isArray(m.events)) m.events = [];
+      if(!m.individual || typeof m.individual!=='object') m.individual = {};
+    });
+  });
+  return s;
+}
+function getProfile(name){ return (state.profiles && state.profiles[name]) ? Object.assign({}, EMPTY_PROFILE, state.profiles[name]) : Object.assign({}, EMPTY_PROFILE); }
+function loadState(){
+  // Instant local render from the last-known cache while we wait for Firebase.
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      return sanitizeState(JSON.parse(raw));
+    }
+  }catch(e){ console.error('local cache load error', e); }
+  return defaultState();
+}
+let state = loadState();
+let uiTab = 'home'; // home | stats | manual | history
+let statsSubtab = 'wins';
+let selectedTrendPlayer = null;
+let selectedFitPlayer = null;
+let selectedH2HA = null, selectedH2HB = null;
+let editingProfileFor = null;
+let selectedCardPlayer = null;
+let progressionMetric = 'net';
+const AVATAR_OPTIONS = ['🎾','😎','🔥','⚡','🐐','🦁','🐺','🦊','🐻','🥷','🤖','👑','💪','🎯','🚀','😈'];
+let gameTimerHandle = null;
+let pairPickA = null, pairPickB = null;
+let seriesModeSelected = false; // "play a series" checkbox state while picking pairs
+let viewingPastSessionId = null; // when browsing a finished session from dashboard
+
+// Live sync: fires immediately with current cloud data, then again on every change from any device.
+dbRef.on('value', (snapshot)=>{
+  const remote = snapshot.val();
+  const wasReady = firebaseReady;
+  firebaseReady = true;
+  if(remote){
+    state = sanitizeState(remote);
+  } else if(wasReady===false){
+    // brand new database — nothing there yet, keep our local/default state
+  }
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  if(wasReady===false){ toast('מחובר — הנתונים משותפים עם כל הקבוצה'); handleUrlCommand(); }
+  render();
+}, (err)=>{
+  console.error('firebase sync error', err);
+  toast('בעיית חיבור לענן — עובד זמנית על הנתונים המקומיים');
+});
+// Lets an external trigger (e.g. a Siri Shortcut) record a point by opening the site with ?cmd=...
+// in the URL. Runs once, right after the first successful data sync, then strips the parameter
+// so a refresh doesn't replay the same command.
+function handleUrlCommand(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    let cmd = params.get('cmd');
+    if(!cmd) return;
+    history.replaceState({}, '', window.location.pathname + window.location.hash);
+    const hasWake = WAKE_WORDS.some(w=>cmd.includes(w));
+    if(!hasWake) cmd = WAKE_WORDS[0]+' '+cmd;
+    const session = getActiveSession();
+    const activeMatch = (session && !session.finished && session.pairsCache) ? session.matches.find(m=>!m.finished) : null;
+    if(!activeMatch){
+      toast('התקבלה פקודה חיצונית אבל אין משחק פעיל כרגע: "'+cmd+'"');
+      return;
+    }
+    handleVoiceCommand([cmd], activeMatch.id);
+  }catch(e){ console.error('url command error', e); }
+}
+
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  dbRef.set(state).catch(err=>{
+    console.error('firebase save error', err);
+    toast('לא הצלחנו לשמור לענן — בדקו חיבור לאינטרנט');
+  });
+}
+function getGender(name){ return (state.genders && state.genders[name]) || null; }
+function setPlayerGender(name, val){
+  if(!state.genders) state.genders = {};
+  if(val) state.genders[name] = val; else delete state.genders[name];
+  saveState();
+}
+function degender(text, gender){
+  return text.replace(/\{([^|{}]+)\|([^|{}]+)\}/g, (m,a,b)=> gender==='F' ? b : a);
+}
+function uid(){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ======================= UTIL ======================= */
+function combos2(arr){
+  const out=[];
+  for(let i=0;i<arr.length;i++)for(let j=i+1;j<arr.length;j++) out.push([arr[i],arr[j]]);
+  return out;
+}
+function pairKey(pair){ return [...pair].sort((a,b)=>a.localeCompare(b,'he')).join(' ו-'); }
+function fmtDate(d){
+  try{ return new Date(d).toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'numeric'}); }catch(e){ return d; }
+}
+function fmtTime(sec){
+  sec = Math.max(0,Math.floor(sec));
+  const m = Math.floor(sec/60).toString().padStart(2,'0');
+  const s = (sec%60).toString().padStart(2,'0');
+  return m+':'+s;
+}
+function hashStr(str){
+  let h=0; for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+  return h;
+}
+let __pickUsage = null; // tracks which template variants were already used in the current summary render, to avoid repeats across players
+function pick(arr, seedStr){
+  const idx = hashStr(seedStr) % arr.length;
+  if(!__pickUsage || arr.length<=1) return arr[idx];
+  let used = __pickUsage.get(arr);
+  if(!used){ used = new Set(); __pickUsage.set(arr, used); }
+  if(used.size >= arr.length) used.clear(); // every variant used at least once — start a fresh cycle
+  let candidate = idx, attempts = 0;
+  while(used.has(candidate) && attempts < arr.length){
+    candidate = (candidate+1) % arr.length;
+    attempts++;
+  }
+  used.add(candidate);
+  return arr[candidate];
+}
+function allFinishedSessions(){
+  return state.sessions.filter(s=>s.finished).sort((a,b)=>a.number-b.number);
+}
+function allMatches(){
+  const out=[];
+  state.sessions.forEach(s=>s.matches.forEach(m=>{ if(m.finished) out.push({...m, sessionId:s.id, sessionNumber:s.number}); }));
+  return out;
+}
+
+/* ======================= SCORE ENGINE ======================= */
+function computeScore(a,b){
+  if(a>=4 && a-b>=2) return {over:true, winner:'A', labelA:'ניצחון', labelB:''};
+  if(b>=4 && b-a>=2) return {over:true, winner:'B', labelA:'', labelB:'ניצחון'};
+  let labelA, labelB, deuce=false;
+  if(a>=3 && b>=3){
+    const diff=a-b;
+    if(diff===0){ labelA='40'; labelB='40'; deuce=true; }
+    else if(diff===1){ labelA='יתרון'; labelB='40'; }
+    else { labelA='40'; labelB='יתרון'; }
+  } else {
+    const arr=['0','15','30'];
+    labelA = a>=3 ? '40' : arr[a];
+    labelB = b>=3 ? '40' : arr[b];
+  }
+  return {over:false, labelA, labelB, deuce};
+}
+
+function newMatch(pairA, pairB, seriesId, seriesGameIndex){
+  const individual = {};
+  [...pairA, ...pairB].forEach(p=> individual[p] = {pos:0, negNet:0, negGlass:0});
+  return {
+    id: uid(),
+    pairA, pairB,
+    pointsA:0, pointsB:0,
+    individual,
+    events: [],
+    winner: null,
+    star: false,
+    finished: false,
+    elapsed: 0,
+    paused: true,
+    startedAt: null,
+    seriesId: seriesId || null,
+    seriesGameIndex: seriesGameIndex || null,
+  };
+}
+function negTotal(ind){ return (ind.negNet||0) + (ind.negGlass||0); }
+
+function addPoint(match, actingPair, kind, player){
+  if(match.finished) return;
+  if(kind==='pos'){
+    if(actingPair==='A') match.pointsA++; else match.pointsB++;
+    match.individual[player].pos++;
+  } else {
+    // kind is 'negNet' or 'negGlass' — the error's own pair loses the point to the opponent
+    if(actingPair==='A') match.pointsB++; else match.pointsA++;
+    match.individual[player][kind]++;
+  }
+  match.events.push({actingPair, kind, player});
+  const sc = computeScore(match.pointsA, match.pointsB);
+  if(sc.over){
+    match.finished = true;
+    match.winner = sc.winner;
+    const loserPts = sc.winner==='A' ? match.pointsB : match.pointsA;
+    match.star = (loserPts === 0);
+    match.paused = true;
+  }
+}
+
+function undoLastPoint(match){
+  const ev = match.events.pop();
+  if(!ev) return;
+  if(ev.kind==='pos'){
+    if(ev.actingPair==='A') match.pointsA--; else match.pointsB--;
+    match.individual[ev.player].pos--;
+  } else {
+    if(ev.actingPair==='A') match.pointsB--; else match.pointsA--;
+    match.individual[ev.player][ev.kind]--;
+  }
+  if(match.finished){ match.finished=false; match.winner=null; match.star=false; }
+}
+
+/* ======================= TIMER ======================= */
+function startTimerLoop(){
+  clearInterval(gameTimerHandle);
+  gameTimerHandle = setInterval(()=>{
+    const s = getActiveSession();
+    if(!s) return;
+    const m = s.matches.find(m=>!m.finished);
+    if(!m || m.paused) return;
+    m.elapsed++;
+    const el = document.getElementById('sbTime');
+    if(el) el.textContent = fmtTime(m.elapsed);
+    saveState();
+  },1000);
+}
+startTimerLoop();
+
+/* ======================= WAKE LOCK (keep screen on during a match) ======================= */
+let wakeLockRef = null;
+async function requestWakeLock(){
+  try{
+    if('wakeLock' in navigator && !wakeLockRef){
+      wakeLockRef = await navigator.wakeLock.request('screen');
+      wakeLockRef.addEventListener('release', ()=>{ wakeLockRef=null; });
+    }
+  }catch(e){ console.warn('wake lock request failed', e); }
+}
+function releaseWakeLock(){
+  if(wakeLockRef){
+    wakeLockRef.release().catch(()=>{});
+    wakeLockRef = null;
+  }
+}
+document.addEventListener('visibilitychange', ()=>{
+  // iOS releases the lock automatically when the tab is hidden; re-acquire it
+  // once the user comes back, but only if a match is actually in progress.
+  if(document.visibilityState==='visible'){
+    const s = getActiveSession();
+    if(s && s.matches.some(m=>!m.finished)) requestWakeLock();
+  }
+});
+
+/* ======================= VOICE COMMANDS ("תרשום נקודה לאבידן") ======================= */
+let voiceListening = false;
+let recognitionInstance = null;
+const WAKE_WORDS = ['תרשום','תרשמו','תרשמי','תירשם','רשום'];
+function voiceSupported(){
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+function isIOSDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent||'') && !window.MSStream;
+}
+function startVoiceRecognition(mid){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast('זיהוי קול לא נתמך בדפדפן הזה'); voiceListening=false; return; }
+  if(recognitionInstance){ try{ recognitionInstance.onend=null; recognitionInstance.stop(); }catch(e){} }
+  recognitionInstance = new SR();
+  recognitionInstance.lang = 'he-IL';
+  // iOS has a known bug where continuous mode gets stuck — restart-loop there.
+  // Everywhere else (Chrome, Edge, desktop Safari) continuous mode is reliable
+  // and avoids re-requesting the microphone after every single phrase.
+  recognitionInstance.continuous = !isIOSDevice();
+  recognitionInstance.interimResults = false;
+  recognitionInstance.maxAlternatives = 5; // Hebrew names often get mistranscribed slightly — trying several candidates improves match odds
+  recognitionInstance.onresult = (e)=>{
+    const res = e.results[e.results.length-1];
+    const alternatives = [];
+    for(let i=0;i<res.length;i++) alternatives.push(res[i].transcript);
+    handleVoiceCommand(alternatives, mid);
+  };
+  recognitionInstance.onerror = (e)=>{
+    console.warn('speech recognition error', e.error);
+    if(e.error==='not-allowed' || e.error==='service-not-allowed'){
+      toast('הגישה למיקרופון נחסמה — יש לאשר בהגדרות הדפדפן');
+      voiceListening = false;
+      render();
+    }
+  };
+  recognitionInstance.onend = ()=>{
+    if(voiceListening){
+      setTimeout(()=>{ if(voiceListening && recognitionInstance){ try{ recognitionInstance.start(); }catch(e){} } }, 250);
+    }
+  };
+  try{ recognitionInstance.start(); }catch(e){ console.warn(e); }
+}
+function stopVoiceRecognition(){
+  voiceListening = false;
+  if(recognitionInstance){
+    try{ recognitionInstance.onend=null; recognitionInstance.stop(); }catch(e){}
+    recognitionInstance = null;
+  }
+}
+function toggleVoice(mid){
+  if(voiceListening){ stopVoiceRecognition(); }
+  else { voiceListening = true; startVoiceRecognition(mid); }
+  render();
+}
+function handleVoiceCommand(transcriptOrList, mid){
+  const s = getActiveSession();
+  const m = s && s.matches.find(x=>x.id===mid);
+  if(!m || m.finished) return;
+  const candidates = (Array.isArray(transcriptOrList) ? transcriptOrList : [transcriptOrList]).filter(Boolean);
+  const allPlayers = [...m.pairA, ...m.pairB];
+
+  // Pass 1: exact substring match (fast path) — try every recognition alternative, not just the top guess.
+  for(const raw of candidates){
+    const text = raw.trim();
+    let wakeIdx=-1, wakeLen=0;
+    WAKE_WORDS.forEach(w=>{
+      const i = text.indexOf(w);
+      if(i!==-1 && (wakeIdx===-1 || i<wakeIdx || (i===wakeIdx && w.length>wakeLen))){ wakeIdx=i; wakeLen=w.length; }
+    });
+    if(wakeIdx===-1) continue;
+    const command = text.slice(wakeIdx+wakeLen).trim();
+    let kind = null;
+    if(command.includes('רשת')) kind='negNet';
+    else if(command.includes('זכוכית') || command.includes('חוץ')) kind='negGlass';
+    else if(command.includes('נקודה')) kind='pos';
+    let matchedPlayer = null;
+    allPlayers.forEach(p=>{ if(command.includes(p) && (!matchedPlayer || p.length>matchedPlayer.length)) matchedPlayer=p; });
+    if(!kind && matchedPlayer) kind='pos';
+    if(matchedPlayer && kind){ commitVoiceCommand(mid, m, matchedPlayer, kind); return; }
+  }
+
+  // Pass 2: fuzzy fallback — speech recognition frequently mishears short Hebrew names/keywords by a letter or two.
+  // Find the wake word (exactly or approximately) in any alternative, then fuzzy-match the rest against known players/keywords.
+  let afterWake = null;
+  outer:
+  for(const raw of candidates){
+    const text = raw.trim();
+    for(const w of WAKE_WORDS){
+      const i = text.indexOf(w);
+      if(i!==-1){ afterWake = text.slice(i+w.length).trim(); break outer; }
+    }
+  }
+  if(afterWake===null){
+    outer2:
+    for(const raw of candidates){
+      const words = raw.trim().split(/\s+/).filter(Boolean);
+      for(let i=0;i<words.length;i++){
+        const isWakeish = WAKE_WORDS.some(ww => levenshteinRatio(ww, words[i]) <= 0.34);
+        if(isWakeish){ afterWake = words.slice(i+1).join(' '); break outer2; }
+      }
+    }
+  }
+  if(afterWake===null){
+    flashVoiceFeedback('fail');
+    toast('לא זוהתה מילת הפעלה. נשמע: "'+(candidates[0]||'')+'"');
+    return;
+  }
+
+  const fuzzyPlayer = fuzzyBestMatch(afterWake, allPlayers, 0.34);
+  const fuzzyKindWord = fuzzyBestMatch(afterWake, ['רשת','זכוכית','חוץ','נקודה'], 0.34);
+  let kind = null;
+  if(fuzzyKindWord==='רשת') kind='negNet';
+  else if(fuzzyKindWord==='זכוכית' || fuzzyKindWord==='חוץ') kind='negGlass';
+  else if(fuzzyKindWord==='נקודה') kind='pos';
+  if(!kind && fuzzyPlayer) kind='pos';
+
+  if(fuzzyPlayer && kind){
+    commitVoiceCommand(mid, m, fuzzyPlayer, kind);
+    toast('זוהה בקירוב: '+(kind==='pos'?'נקודה':kind==='negNet'?'רשת':'זכוכית')+' ל'+fuzzyPlayer);
+  } else {
+    flashVoiceFeedback('fail');
+    toast('לא זוהתה פקודה. נשמע: "'+(candidates[0]||'')+'"');
+  }
+}
+function commitVoiceCommand(mid, m, matchedPlayer, kind){
+  const pair = m.pairA.includes(matchedPlayer) ? 'A' : 'B';
+  doPoint(mid, pair, kind, matchedPlayer);
+  flashVoiceFeedback(kind==='pos' ? 'pos' : 'neg');
+}
+// Levenshtein edit distance, normalized to 0..1 (0 = identical, 1 = completely different)
+function levenshteinRatio(a,b){
+  a=a||''; b=b||'';
+  const m=a.length, n=b.length;
+  if(m===0 && n===0) return 0;
+  const dp = [];
+  for(let i=0;i<=m;i++){ dp.push(new Array(n+1).fill(0)); dp[i][0]=i; }
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  return dp[m][n] / Math.max(m,n);
+}
+// Fuzzy-searches `candidates` (player names / action keywords) inside free-form `text`,
+// by comparing each candidate against every 1-3 word window of the text and keeping the closest match.
+function fuzzyBestMatch(text, candidates, maxRatio){
+  const words = (text||'').split(/\s+/).filter(Boolean);
+  if(!words.length) return null;
+  let best=null, bestRatio=Infinity;
+  candidates.forEach(cand=>{
+    for(let start=0; start<words.length; start++){
+      for(let len=1; len<=3 && start+len<=words.length; len++){
+        const windowText = words.slice(start,start+len).join('');
+        const ratio = levenshteinRatio(cand, windowText);
+        if(ratio < bestRatio){ bestRatio = ratio; best = cand; }
+      }
+    }
+  });
+  return (best!==null && bestRatio<=maxRatio) ? best : null;
+}
+function flashVoiceFeedback(type){
+  const el = document.getElementById('voiceFlash');
+  const icon = document.getElementById('voiceFlashIcon');
+  if(!el || !icon) return;
+  const icons = { pos:'✅', neg:'⚠️', fail:'❓' };
+  const vibrations = { pos:[80], neg:[70,50,70], fail:[40,60,40] };
+  icon.textContent = icons[type] || '❓';
+  el.classList.remove('neg','fail');
+  if(type==='neg') el.classList.add('neg');
+  if(type==='fail') el.classList.add('fail');
+  el.classList.add('show');
+  if(navigator.vibrate) navigator.vibrate(vibrations[type] || vibrations.fail);
+  clearTimeout(flashVoiceFeedback._t);
+  flashVoiceFeedback._t = setTimeout(()=> el.classList.remove('show'), type==='fail'?900:1100);
+}
+
+/* ======================= SESSION HELPERS ======================= */
+function getActiveSession(){
+  if(!state.currentSessionId) return null;
+  return state.sessions.find(s=>s.id===state.currentSessionId) || null;
+}
+function createNewSession(){
+  // Derive the number from the actual sessions on record, rather than trusting the separately-stored
+  // nextSessionNumber counter — that counter can drift (e.g. after deleting sessions) and end up
+  // suggesting a number like 15 when there are actually zero sessions left.
+  const nextNum = state.sessions.length ? Math.max(...state.sessions.map(s=>s.number)) + 1 : 1;
+  const s = {
+    id: uid(),
+    number: nextNum,
+    date: new Date().toISOString().slice(0,10),
+    playersPresent: [],
+    matches: [],
+    finished: false,
+  };
+  state.sessions.push(s);
+  state.nextSessionNumber = nextNum+1;
+  state.currentSessionId = s.id;
+  saveState();
+}
+
+/* ======================= RENDER: SHELL / NAV ======================= */
+function renderTabs(){
+  const tabs = [
+    {id:'home', label:'בית'},
+    {id:'history', label:'היסטוריה'},
+    {id:'stats', label:'סטטיסטיקות'},
+    {id:'manual', label:'עריכה ידנית'},
+  ];
+  document.getElementById('mainTabs').innerHTML = tabs.map(t=>
+    `<button class="${uiTab===t.id?'active':''}" onclick="setTab('${t.id}')">${t.label}</button>`
+  ).join('');
+}
+function setTab(t){ if(voiceListening) stopVoiceRecognition(); uiTab=t; viewingPastSessionId=null; render(); }
+function esc(s){ return (s+'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// Safe for embedding inside a single-quoted JS string literal that itself sits inside a double-quoted HTML attribute
+// (e.g. onclick="fn('${jsAttr(name)}')"). Escaping order matters: JS-escape first, then HTML-escape the attribute delimiters,
+// so names with apostrophes/quotes round-trip correctly instead of breaking out of the inline handler.
+function jsAttr(s){
+  return (s+'')
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/&/g,'&amp;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ======================= MASTER RENDER ======================= */
+function render(){
+  releaseWakeLock();
+  renderTabs();
+  const root = document.getElementById('viewRoot');
+  if(uiTab==='stats'){ root.innerHTML = renderStatsView(); afterStatsRender(); return; }
+  if(uiTab==='manual'){ root.innerHTML = renderManualView(); return; }
+  if(uiTab==='history'){ root.innerHTML = renderHistoryView(); return; }
+  root.innerHTML = renderHomeView();
+}
+
+/* ======================= HOME FLOW ======================= */
+function renderHomeView(){
+  const session = viewingPastSessionId
+    ? state.sessions.find(s=>s.id===viewingPastSessionId)
+    : getActiveSession();
+
+  if(!session){
+    return renderDashboard();
+  }
+  if(session.finished){
+    return renderSummarySubview(session);
+  }
+  if(!session.pairsCache){
+    return renderSetupSubview(session);
+  }
+  const activeMatch = session.matches.find(m=>!m.finished);
+  if(activeMatch){
+    return renderGameSubview(session, activeMatch);
+  }
+  return renderPairsSubview(session);
+}
+
+function renderDashboard(){
+  const past = state.sessions.slice().sort((a,b)=>b.number-a.number);
+  let html = `
+  <div class="hero">
+    <h2>מוכנים למפגש?</h2>
+    <p>התחילו מפגש חדש, סמנו מי הגיע היום, וקבלו רשימת צמדים אפשריים לבחירה — כולל שעון, ניקוד טניס חי וסטטיסטיקה שנשמרת לתמיד.</p>
+    <button class="btn accent" onclick="createNewSession(); render();">🎾 מפגש חדש</button>
+  </div>
+  ${renderCurseCard()}
+  ${renderAttendancePollCard()}`;
+  if(past.length===0){
+    html += `<div class="card"><div class="empty"><div class="big">🏟️</div>עוד לא נרשמו מפגשים. בואו נתחיל!</div></div>`;
+  } else {
+    const recent = past.slice(0,3);
+    html += `<div class="card">
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <h2>מפגשים אחרונים</h2>
+        <button class="btn ghost sm" onclick="setTab('history')">כל ההיסטוריה →</button>
+      </div>
+      <p class="hint">לחצו על מפגש כדי לצפות בסיכום שלו.</p>`;
+    recent.forEach(s=>{
+      const matches = s.matches.filter(m=>m.finished).length;
+      const stars = s.matches.filter(m=>m.star).length;
+      html += `<div class="session-row" onclick="viewPastSession('${s.id}')">
+        <div>
+          <div class="num">מפגש #${s.number}</div>
+          <div class="meta">${fmtDate(s.date)} · ${s.playersPresent.length} שחקנים</div>
+        </div>
+        <div class="stats">${matches} משחקים ${stars?'· ⭐'+stars:''} ${s.finished?'':'<span class="badge">בעיצומו</span>'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  return html;
+}
+function viewPastSession(id){
+  const s = state.sessions.find(x=>x.id===id);
+  uiTab = 'home';
+  if(!s.finished){ state.currentSessionId = id; viewingPastSessionId=null; }
+  else { viewingPastSessionId = id; }
+  render();
+}
+function renderCurseCard(){
+  const curse = getCurseHolders();
+  if(!curse) return '';
+  return `<div class="card" style="border-color:var(--danger);">
+    <h2>🗑️ קללת המפסיד</h2>
+    <p class="hint">מוחזקת ע״י מי שהפסיד במשחק האחרון בליגה — עד שמישהו אחר יפסיד ויוריד אותם מהכתר הזה.</p>
+    <div class="mvp-banner" style="background:linear-gradient(120deg, rgba(224,73,73,.18), transparent); border-color:rgba(224,73,73,.4);">
+      <div class="trophy">🗑️</div>
+      <div><div class="name" style="color:var(--danger);">${esc(curse.players.join(' ו-'))}</div>
+      <div class="label">הפסידו במפגש #${curse.sessionNumber} · ${curse.score}</div></div>
+    </div>
+  </div>`;
+}
+function renderAttendancePollCard(){
+  const poll = state.attendancePoll;
+  if(!poll || !poll.active){
+    return `<div class="card">
+      <h2>📋 מי מגיע בפעם הבאה?</h2>
+      <p class="hint">פתחו סקר נוכחות שכל אחד יכול לסמן ישירות מהטלפון שלו — בלי לספור הודעות בוואטסאפ.</p>
+      <button class="btn accent" onclick="startAttendancePoll()">📋 פתיחת סקר נוכחות</button>
+    </div>`;
+  }
+  const responders = state.players.slice();
+  const comingCount = responders.filter(p=>poll.responses[p]===true).length;
+  return `<div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center;">
+      <h2>📋 מי מגיע בפעם הבאה?</h2>
+      <button class="btn ghost sm" onclick="closeAttendancePoll()">סגירת הסקר</button>
+    </div>
+    ${poll.note ? `<p class="hint">${esc(poll.note)}</p>` : ''}
+    <p class="hint">${comingCount} מגיעים מתוך ${responders.length} שחקנים ברשימה. לחצו על השם שלכם כדי לסמן/לבטל.</p>
+    <div class="row">
+      ${responders.map(p=>{
+        const coming = poll.responses[p]===true;
+        return `<span class="chip player ${coming?'checked':''}" onclick="toggleAttendance('${jsAttr(p)}')">${coming?'✅ ':''}${esc(p)}</span>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+function startAttendancePoll(){
+  state.attendancePoll = { active:true, note:'', responses:{} };
+  saveState(); render();
+}
+function toggleAttendance(name){
+  if(!state.attendancePoll || !state.attendancePoll.active) return;
+  state.attendancePoll.responses[name] = !state.attendancePoll.responses[name];
+  saveState(); render();
+}
+function closeAttendancePoll(){
+  if(!confirm('לסגור את הסקר? אפשר יהיה לפתוח סקר חדש בכל רגע.')) return;
+  state.attendancePoll = null;
+  saveState(); render();
+}
+
+function renderHistoryView(){
+  const sessions = state.sessions.slice().sort((a,b)=>b.number-a.number);
+  let html = `<div class="card">
+    <h2>היסטוריית מפגשים</h2>
+    <p class="hint">${sessions.length} מפגשים בסך הכול. לחצו על מפגש כדי לראות את הסיכום המלא שלו.</p>
+  </div>`;
+  if(sessions.length===0){
+    html += `<div class="card"><div class="empty"><div class="big">📜</div>עוד אין מפגשים בהיסטוריה.</div></div>`;
+    return html;
+  }
+  html += `<div class="card">`;
+  sessions.forEach(s=>{
+    const finishedMatches = s.matches.filter(m=>m.finished);
+    const stars = s.matches.filter(m=>m.star).length;
+    const winsByPlayer = {};
+    finishedMatches.forEach(m=>{
+      const winners = m.winner==='A'?m.pairA:m.pairB;
+      winners.forEach(p=> winsByPlayer[p]=(winsByPlayer[p]||0)+1);
+    });
+    let topPlayer = null;
+    Object.keys(winsByPlayer).forEach(p=>{ if(!topPlayer || winsByPlayer[p]>winsByPlayer[topPlayer]) topPlayer=p; });
+    html += `<div class="session-row" onclick="viewPastSession('${s.id}')">
+      <div>
+        <div class="num">מפגש #${s.number}</div>
+        <div class="meta">${fmtDate(s.date)} · ${esc(s.playersPresent.join(', '))}</div>
+      </div>
+      <div class="stats">
+        ${finishedMatches.length} משחקים ${stars?'· ⭐'+stars:''}<br>
+        ${topPlayer?`מוביל/ה: ${esc(topPlayer)}`:''} ${s.finished?'':'<span class="badge">בעיצומו</span>'}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderSetupSubview(session){
+  const playerChips = state.players.map(p=>{
+    const checked = session.playersPresent.includes(p);
+    return `<span class="chip player ${checked?'checked':''}" onclick="togglePresentPlayer('${session.id}','${jsAttr(p)}')">${esc(p)}</span>`;
+  }).join('');
+  return `
+  <div class="card">
+    <h2>מפגש #${session.number} · הגדרות התחלה</h2>
+    <p class="hint">קבעו תאריך, בחרו מי הגיע היום, והוסיפו שחקנים חדשים אם צריך.</p>
+    <div class="field">
+      <label>תאריך המפגש</label>
+      <input type="date" value="${session.date}" onchange="updateSessionDate('${session.id}', this.value)">
+    </div>
+    <div class="field">
+      <label>מספר מפגש</label>
+      <input type="number" min="1" value="${session.number}" onchange="updateSessionNumber('${session.id}', this.value)">
+      <p class="hint" style="margin-top:4px;">חייב להיות שונה ממספרי מפגשים קיימים אחרים.</p>
+    </div>
+    <div class="divider"></div>
+    <div class="field">
+      <label>מי הגיע היום? (${session.playersPresent.length} נבחרו)</label>
+      <div class="row">${playerChips || '<span class="hint">עדיין אין שחקנים ברשימה — הוסיפו למטה.</span>'}</div>
+    </div>
+    <div class="field">
+      <label>הוספת שחקן חדש</label>
+      <div class="row">
+        <input type="text" id="newPlayerName" placeholder="שם השחקן" style="flex:1;min-width:140px;" onkeydown="if(event.key==='Enter'){addNewPlayer('${session.id}')}">
+        <select id="newPlayerGender" style="width:auto;">
+          <option value="M" selected>זכר</option>
+          <option value="F">נקבה</option>
+        </select>
+        <button class="btn ghost" onclick="addNewPlayer('${session.id}')">+ הוסף</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <button class="btn accent block" ${session.playersPresent.length<4?'disabled':''} onclick="confirmPlayers('${session.id}')">
+      המשך לבחירת צמדים (${session.playersPresent.length}/4 לפחות) →
+    </button>
+  </div>`;
+}
+function togglePresentPlayer(sid, name){
+  const s = state.sessions.find(x=>x.id===sid);
+  const i = s.playersPresent.indexOf(name);
+  if(i>=0) s.playersPresent.splice(i,1); else s.playersPresent.push(name);
+  saveState(); render();
+}
+function addNewPlayer(sid){
+  const input = document.getElementById('newPlayerName');
+  const genderSel = document.getElementById('newPlayerGender');
+  const name = input.value.trim();
+  if(!name) return;
+  if(!state.players.includes(name)) state.players.push(name);
+  if(genderSel && genderSel.value) setPlayerGender(name, genderSel.value);
+  const s = state.sessions.find(x=>x.id===sid);
+  if(!s.playersPresent.includes(name)) s.playersPresent.push(name);
+  saveState(); render();
+}
+function updateSessionDate(sid, val){
+  state.sessions.find(x=>x.id===sid).date = val; saveState();
+}
+function updateSessionNumber(sid, val){
+  const n = parseInt(val,10);
+  const s = state.sessions.find(x=>x.id===sid);
+  if(!n || n<1){ toast('מספר מפגש לא תקין'); render(); return; }
+  const conflict = state.sessions.find(x=>x.id!==sid && x.number===n);
+  if(conflict){
+    alert(`מספר מפגש ${n} כבר תפוס ע"י מפגש קיים מתאריך ${fmtDate(conflict.date)}. בחרו מספר אחר.`);
+    render();
+    return;
+  }
+  s.number = n; saveState(); render();
+}
+function confirmPlayers(sid){
+  const s = state.sessions.find(x=>x.id===sid);
+  s.pairsCache = combos2(s.playersPresent);
+  saveState(); render();
+}
+function backToSetup(sid){
+  const s = state.sessions.find(x=>x.id===sid);
+  s.pairsCache = null;
+  pairPickA=null; pairPickB=null;
+  saveState(); render();
+}
+
+function renderPairsSubview(session){
+  const pairs = session.pairsCache || combos2(session.playersPresent);
+  const overlap = (p1,p2)=> p1.some(x=>p2.includes(x));
+  let chipsHtml = pairs.map((p,idx)=>{
+    let cls='chip selectable';
+    let disabled=false;
+    if(pairPickA && p[0]===pairPickA[0] && p[1]===pairPickA[1]) cls+=' selected';
+    else if(pairPickB && p[0]===pairPickB[0] && p[1]===pairPickB[1]) cls+=' selected b';
+    else if(pairPickA && overlap(p,pairPickA)) { cls+=' disabled'; disabled=true; }
+    else if(pairPickB && overlap(p,pairPickB)) { cls+=' disabled'; disabled=true; }
+    return `<span class="${cls}" ${disabled?'':`onclick="pickPair(${idx})"`}>${esc(p[0])} + ${esc(p[1])}</span>`;
+  }).join('');
+
+  const finishedMatches = session.matches.filter(m=>m.finished);
+  let historyHtml = '';
+  if(finishedMatches.length){
+    historyHtml = `<div class="card"><h2>משחקים במפגש זה</h2>`;
+    finishedMatches.slice().reverse().forEach(m=>{
+      const win = m.winner==='A' ? m.pairA : m.pairB;
+      const lose = m.winner==='A' ? m.pairB : m.pairA;
+      const seriesTag = m.seriesId ? ` · 🏆 משחקון ${m.seriesGameIndex} במערכה` : '';
+      historyHtml += `<div class="session-row" style="cursor:default;">
+        <div>
+          <div class="num" style="font-size:14px;">${esc(win.join(' + '))} 🏆</div>
+          <div class="meta">מול ${esc(lose.join(' + '))} · ${m.pointsA}:${m.pointsB} · ${fmtTime(m.elapsed)} ${m.star?'· ⭐ נקי':''}${seriesTag}</div>
+        </div>
+      </div>`;
+    });
+    historyHtml += `</div>`;
+  }
+
+  return `
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center;">
+      <h2>מפגש #${session.number} · בחירת צמדים</h2>
+      <button class="btn ghost sm" onclick="backToSetup('${session.id}')">✎ עריכת שחקנים</button>
+    </div>
+    <p class="hint">בחרו צמד ראשון ואז צמד יריב (ללא שחקן משותף), ואז בחרו מצב משחק.</p>
+    <div class="row">${chipsHtml}</div>
+    <div class="divider"></div>
+    <p class="hint" style="margin-bottom:6px;">מצב משחק:</p>
+    <div class="row" style="gap:10px;">
+      <button class="btn ${!seriesModeSelected?'accent':'ghost'}" style="flex:1;" onclick="seriesModeSelected=false; render();">
+        🎾 משחק בודד
+      </button>
+      <button class="btn ${seriesModeSelected?'accent':'ghost'}" style="flex:1;" onclick="seriesModeSelected=true; render();">
+        🏆 מערכה (עד 7 משחקים)
+      </button>
+    </div>
+    <p class="hint" style="margin-top:6px;">${seriesModeSelected ? 'ישחקו ברצף עד שצמד אחד מגיע ל-4 ניצחונות (מקסימום 7 משחקונים), בלי לבחור צמדים מחדש בין משחקון למשחקון.' : 'משחק טניס-ניקוד רגיל אחד בין שני הצמדים שנבחרו.'}</p>
+    <div class="divider"></div>
+    <div class="row" style="justify-content:space-between;align-items:center;">
+      <button class="btn ghost sm" onclick="clearPairPick()">איפוס בחירה</button>
+      <button class="btn accent" ${(pairPickA&&pairPickB)?'':'disabled'} onclick="startMatch('${session.id}')">▶ Play — התחל ${seriesModeSelected?'מערכה':'משחק'}</button>
+    </div>
+  </div>
+  ${historyHtml}
+  <div class="card">
+    <h2>הערות למפגש</h2>
+    <p class="hint">קרה משהו שכדאי שהסיכום יתחשב בו? פציעה, איחור, מזג אוויר, כל דבר — כתבו כאן וזה ישתלב בסיכום בסוף.</p>
+    <textarea id="sessionNotesInput" rows="3" placeholder="לדוגמה: להיקה נתפס הגב במשחק השלישי" onchange="updateSessionNotes('${session.id}', this.value)">${esc(session.notes||'')}</textarea>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center;">
+      <div>
+        <h2>סיום המפגש</h2>
+        <p class="hint" style="margin-bottom:0;">כשסיימתם לשחק היום, סגרו את המפגש כדי לקבל סיכום.</p>
+      </div>
+      <button class="btn danger" ${finishedMatches.length?'':'disabled'} onclick="endSession('${session.id}')">🏁 סיום מפגש</button>
+    </div>
+  </div>`;
+}
+function updateSessionNotes(sid, val){
+  state.sessions.find(s=>s.id===sid).notes = val; saveState();
+}
+function pickPair(idx){
+  const s = getActiveSession();
+  const pairs = s.pairsCache || combos2(s.playersPresent);
+  const p = pairs[idx];
+  if(pairPickA && p[0]===pairPickA[0] && p[1]===pairPickA[1]){ pairPickA=null; }
+  else if(pairPickB && p[0]===pairPickB[0] && p[1]===pairPickB[1]){ pairPickB=null; }
+  else if(!pairPickA){ pairPickA=p; }
+  else if(!pairPickB){ pairPickB=p; }
+  render();
+}
+function clearPairPick(){ pairPickA=null; pairPickB=null; render(); }
+function startMatch(sid){
+  const s = state.sessions.find(x=>x.id===sid);
+  const seriesId = seriesModeSelected ? uid() : null;
+  const m = newMatch(pairPickA, pairPickB, seriesId, seriesId ? 1 : null);
+  m.paused = false;
+  m.startedAt = Date.now();
+  s.matches.push(m);
+  pairPickA=null; pairPickB=null;
+  saveState(); render();
+}
+// Returns {A, B}: how many finished games each side has won so far within this series.
+function getSeriesWins(session, seriesId){
+  const wins = {A:0, B:0};
+  session.matches.forEach(mm=>{
+    if(mm.seriesId===seriesId && mm.finished && mm.winner) wins[mm.winner]++;
+  });
+  return wins;
+}
+
+function renderGameSubview(session, m){
+  requestWakeLock();
+  const sc = computeScore(m.pointsA, m.pointsB);
+  const scoreAClass = 'score' + (m.finished && m.winner==='A' ? ' win':'');
+  const scoreBClass = 'score' + (m.finished && m.winner==='B' ? ' win':'');
+  function playerCtrl(pair, name){
+    const st = m.individual[name];
+    const en = jsAttr(name);
+    return `<div class="player-ctrl">
+      <div class="pname">${esc(name)}</div>
+      <button class="pbtn pos-main" ${m.finished?'disabled':''} onclick="doPoint('${m.id}','${pair}','pos','${en}')">➕ נקודה</button>
+      <div class="err-row">
+        <button class="pbtn err net" ${m.finished?'disabled':''} onclick="doPoint('${m.id}','${pair}','negNet','${en}')">🥅 רשת</button>
+        <button class="pbtn err glass" ${m.finished?'disabled':''} onclick="doPoint('${m.id}','${pair}','negGlass','${en}')">🪟 זכוכית</button>
+      </div>
+      <div class="pstats">+${st.pos} &nbsp;·&nbsp; 🥅${st.negNet} &nbsp;·&nbsp; 🪟${st.negGlass}</div>
+    </div>`;
+  }
+  let resultBanner = '';
+  if(m.finished){
+    const winPair = m.winner==='A'?m.pairA:m.pairB;
+    resultBanner = `<div class="mvp-banner" style="margin:0 14px 16px;">
+      <div class="trophy">🏆</div>
+      <div><div class="name">${esc(winPair.join(' + '))} ניצחו!</div>
+      <div class="label">${m.pointsA}:${m.pointsB} ${m.star?'· ⭐ ניצחון נקי 40-0':''} · זמן משחק ${fmtTime(m.elapsed)}</div></div>
+    </div>`;
+  }
+  let seriesBar = '';
+  if(m.seriesId){
+    const wins = getSeriesWins(session, m.seriesId);
+    seriesBar = `<div class="hint" style="text-align:center;padding:8px 14px 0;">
+      🏆 מערכה · משחקון ${m.seriesGameIndex} · תוצאת מערכה עד כה: ${esc(m.pairA.join('+'))} ${wins.A}-${wins.B} ${esc(m.pairB.join('+'))} (עד 4 ניצחונות)
+    </div>`;
+  }
+  return `
+  ${seriesBar}
+  <div class="scoreboard">
+    <div class="sb-timer">
+      <button class="btn ghost sm" onclick="toggleTimer('${m.id}')">${m.paused?'▶ המשך':'⏸ השהה'}</button>
+      <div>
+        <div class="time" id="sbTime">${fmtTime(m.elapsed)}</div>
+        <div class="status" style="text-align:center;">${m.paused?'מושהה':'רץ'}</div>
+      </div>
+      <button class="btn ghost sm" ${m.events.length?'':'disabled'} onclick="doUndo('${m.id}')">↩ ביטול נקודה</button>
+    </div>
+    <div class="sb-pairs">
+      <div class="sb-pair a">
+        <div class="names">${esc(m.pairA.join(' + '))}</div>
+        <div class="${scoreAClass}">${sc.labelA}</div>
+        ${sc.deuce?'<div class="deuce-tag">דויס — צריך יתרון של 2</div>':''}
+      </div>
+      <div class="sb-pair b">
+        <div class="names">${esc(m.pairB.join(' + '))}</div>
+        <div class="${scoreBClass}">${sc.labelB}</div>
+      </div>
+    </div>
+    ${resultBanner}
+    ${!m.finished ? `<div class="voice-bar">
+      <button class="btn ${voiceListening?'listening':'ghost'}" onclick="toggleVoice('${m.id}')">
+        ${voiceListening ? '🎤 מאזין... (״תרשום נקודה לשם״) — לחצו לעצירה' : '🎤 הפעלת קלט קולי'}
+      </button>
+      ${!voiceSupported() ? '<p class="hint" style="text-align:center;margin-top:6px;">זיהוי קול לא נתמך בדפדפן הזה</p>' : ''}
+    </div>` : ''}
+    <div class="teams-wrap">
+      <div class="team-block a">
+        <div class="team-label">קבוצה א׳</div>
+        <div class="team-players">
+          ${playerCtrl('A', m.pairA[0])}
+          ${playerCtrl('A', m.pairA[1])}
+        </div>
+      </div>
+      <div class="team-block b">
+        <div class="team-label">קבוצה ב׳</div>
+        <div class="team-players">
+          ${playerCtrl('B', m.pairB[0])}
+          ${playerCtrl('B', m.pairB[1])}
+        </div>
+      </div>
+    </div>
+    <div class="game-actions">
+      ${m.finished
+        ? `<button class="btn accent block" onclick="finishMatchReturn('${session.id}')">המשך למשחק הבא →</button>`
+        : `<button class="btn ghost block" onclick="forceEndMatch('${m.id}')">סיום משחק ידני (לפי הניקוד הנוכחי)</button>`
+      }
+    </div>
+  </div>`;
+}
+function toggleTimer(mid){
+  const s = getActiveSession(); const m = s.matches.find(x=>x.id===mid);
+  m.paused = !m.paused;
+  saveState(); render();
+}
+function doPoint(mid, pair, kind, player){
+  const s = getActiveSession(); const m = s.matches.find(x=>x.id===mid);
+  if(m.paused) m.paused = false;
+  addPoint(m, pair, kind, player);
+  if(m.finished && voiceListening){ stopVoiceRecognition(); toast('המשחק הסתיים — ההאזנה הקולית נעצרה'); }
+  if(m.finished && m.seriesId){
+    const wins = getSeriesWins(s, m.seriesId);
+    const winPair = m.winner==='A' ? m.pairA : m.pairB;
+    if(Math.max(wins.A, wins.B) >= 4){
+      toast('🏆🏆 מערכה הסתיימה! '+winPair.join(' + ')+' ניצחו '+Math.max(wins.A,wins.B)+'-'+Math.min(wins.A,wins.B)+' במערכה');
+      flashSeriesTransition({
+        icon:'🏆', title:'המערכה הוכרעה!',
+        sub: winPair.join(' + ')+' ניצחו '+Math.max(wins.A,wins.B)+'-'+Math.min(wins.A,wins.B),
+        decided:true
+      });
+    } else {
+      const next = newMatch(m.pairA, m.pairB, m.seriesId, m.seriesGameIndex+1);
+      next.paused = false;
+      next.startedAt = Date.now();
+      s.matches.push(next);
+      toast('🏆 '+winPair.join(' + ')+' ניצחו את המשחקון! מערכה: '+wins.A+'-'+wins.B+' — ממשיכים למשחקון הבא');
+      flashSeriesTransition({
+        icon:'✅', title:'משחקון '+m.seriesGameIndex+' הסתיים',
+        sub: winPair.join(' + ')+' ניצחו · מערכה: '+wins.A+'-'+wins.B+' · מתחילים משחקון '+next.seriesGameIndex,
+        decided:false
+      });
+    }
+  }
+  saveState(); render();
+}
+// Full-screen green transition shown for a beat between series mini-games, so the switch to a fresh
+// 0-0 scoreboard doesn't feel like the app just glitched. Gold instead of green once the series is decided.
+function flashSeriesTransition({icon, title, sub, decided}){
+  const el = document.getElementById('seriesFlash');
+  const iconEl = document.getElementById('seriesFlashIcon');
+  const titleEl = document.getElementById('seriesFlashTitle');
+  const subEl = document.getElementById('seriesFlashSub');
+  if(!el || !iconEl || !titleEl || !subEl) return;
+  iconEl.textContent = icon;
+  titleEl.textContent = title;
+  subEl.textContent = sub;
+  el.classList.toggle('decided', !!decided);
+  el.classList.add('show');
+  if(navigator.vibrate) navigator.vibrate(decided ? [100,60,100,60,150] : [90]);
+  clearTimeout(flashSeriesTransition._t);
+  flashSeriesTransition._t = setTimeout(()=> el.classList.remove('show'), decided ? 2200 : 1500);
+}
+function doUndo(mid){
+  const s = getActiveSession(); const m = s.matches.find(x=>x.id===mid);
+  undoLastPoint(m); saveState(); render();
+}
+function forceEndMatch(mid){
+  const s = getActiveSession(); const m = s.matches.find(x=>x.id===mid);
+  if(m.pointsA===m.pointsB){ toast('אי אפשר לסיים בתיקו — הוסיפו עוד נקודה'); return; }
+  m.finished = true;
+  m.winner = m.pointsA>m.pointsB?'A':'B';
+  const loserPts = m.winner==='A'?m.pointsB:m.pointsA;
+  m.star = (loserPts===0);
+  m.paused = true;
+  saveState(); render();
+}
+function finishMatchReturn(sid){ render(); }
+
+function endSession(sid){
+  const s = state.sessions.find(x=>x.id===sid);
+  s.finished = true;
+  saveState();
+  render();
+}
+
+/* ======================= SUMMARY (data-driven analysis) ======================= */
+function findPreviousSessionStatsForPlayer(player, beforeSessionNumber){
+  const past = allFinishedSessions().filter(s=>s.number<beforeSessionNumber).sort((a,b)=>b.number-a.number);
+  for(const s of past){
+    let pos=0, neg=0, matches=0, wins=0;
+    s.matches.filter(m=>m.finished).forEach(m=>{
+      if(m.individual[player]){
+        matches++; pos+=m.individual[player].pos; neg+=negTotal(m.individual[player]);
+        const winners = m.winner==='A'?m.pairA:m.pairB;
+        if(winners.includes(player)) wins++;
+      }
+    });
+    if(matches>0) return { sessionNumber:s.number, net:(pos-neg)/matches, winRate: wins/matches };
+  }
+  return null;
+}
+
+function computeSessionPlayerStats(session){
+  const stats = {};
+  session.playersPresent.forEach(p=> stats[p] = {pos:0, negNet:0, negGlass:0, neg:0, wins:0, matches:0});
+  session.matches.filter(m=>m.finished).forEach(m=>{
+    const inMatch = [...m.pairA, ...m.pairB];
+    inMatch.forEach(p=>{
+      if(!stats[p]) stats[p]={pos:0,negNet:0,negGlass:0,neg:0,wins:0,matches:0};
+      stats[p].matches++;
+      stats[p].pos += m.individual[p].pos;
+      stats[p].negNet += m.individual[p].negNet;
+      stats[p].negGlass += m.individual[p].negGlass;
+      stats[p].neg = stats[p].negNet + stats[p].negGlass;
+    });
+    const winners = m.winner==='A'?m.pairA:m.pairB;
+    winners.forEach(p=> stats[p].wins++);
+  });
+  return stats;
+}
+
+// If a match was won with one partner contributing much more (net points) than the other,
+// flags who effectively carried the pair. Returns null when the match wasn't a clear carry situation.
+function detectMatchCarry(m){
+  if(!m.finished || !m.winner) return null;
+  const winPair = m.winner==='A' ? m.pairA : m.pairB;
+  const [p1, p2] = winPair;
+  const net1 = (m.individual[p1]?.pos||0) - negTotal(m.individual[p1]||{});
+  const net2 = (m.individual[p2]?.pos||0) - negTotal(m.individual[p2]||{});
+  const gap = net1 - net2;
+  if(Math.abs(gap) < 3) return null;
+  return gap>0
+    ? {carrier:p1, carried:p2, carrierNet:net1, carriedNet:net2}
+    : {carrier:p2, carried:p1, carrierNet:net2, carriedNet:net1};
+}
+
+// Last `windowSize` finished sessions up to and including `uptoSessionNumber`, for the multi-session trend summary.
+function computeTrendWindow(uptoSessionNumber, windowSize){
+  const sessions = allFinishedSessions().filter(s=>s.number<=uptoSessionNumber);
+  return sessions.slice(-windowSize);
+}
+function computeTrendStats(windowSessions){
+  const stats = {};
+  windowSessions.forEach(s=>{
+    const sstats = computeSessionPlayerStats(s);
+    Object.keys(sstats).forEach(p=>{
+      if(sstats[p].matches===0) return;
+      if(!stats[p]) stats[p] = {sessions:0, netSum:0, wins:0, matches:0, perSessionNet:[]};
+      const net = sstats[p].pos - sstats[p].neg;
+      stats[p].sessions++;
+      stats[p].netSum += net;
+      stats[p].wins += sstats[p].wins;
+      stats[p].matches += sstats[p].matches;
+      stats[p].perSessionNet.push(net);
+    });
+  });
+  return stats;
+}
+
+function partnersWonWith(name, finishedMatches){
+  const set = new Set();
+  finishedMatches.forEach(m=>{
+    const winPair = m.winner==='A'?m.pairA:m.pairB;
+    if(winPair.includes(name)) set.add(winPair.find(x=>x!==name));
+  });
+  return [...set];
+}
+// All distinct partners a player played alongside today, win or lose (unlike partnersWonWith above).
+function allPartnersFor(name, finishedMatches){
+  const set = new Set();
+  finishedMatches.forEach(m=>{
+    [m.pairA, m.pairB].forEach(pair=>{
+      if(pair.includes(name)) set.add(pair.find(x=>x!==name));
+    });
+  });
+  return [...set];
+}
+function closestMatchFor(name, finishedMatches){
+  let best = null;
+  finishedMatches.forEach(m=>{
+    if(![...m.pairA, ...m.pairB].includes(name)) return;
+    const margin = Math.abs(m.pointsA - m.pointsB);
+    if(!best || margin < best.margin) best = {margin, m};
+  });
+  return best;
+}
+function tpl(str, vars){
+  return str.replace(/\{(\w+)\}/g, (_,k)=> vars[k]!==undefined ? vars[k] : '');
+}
+
+/* ---- Derived padel insights — computed entirely from the existing point log, no extra input ---- */
+function isClutch(a,b){ return a>=3 && b>=3; }
+function computeMatchInsights(m){
+  let a=0, b=0;
+  let curPlayer=null, curLen=0;
+  const streaks = {};
+  const clutchScored = {};
+  const n = m.events.length;
+  const halves = {};
+  [...m.pairA, ...m.pairB].forEach(p=> halves[p] = {firstErr:0, firstTotal:0, secondErr:0, secondTotal:0});
+  m.events.forEach((ev,i)=>{
+    const clutch = isClutch(a,b);
+    const half = i < n/2 ? 'first' : 'second';
+    if(halves[ev.player]){
+      halves[ev.player][half+'Total']++;
+      if(ev.kind!=='pos') halves[ev.player][half+'Err']++;
+    }
+    if(ev.kind==='pos'){
+      curLen = (ev.player===curPlayer) ? curLen+1 : 1;
+      curPlayer = ev.player;
+      if(!streaks[ev.player] || curLen>streaks[ev.player]) streaks[ev.player] = curLen;
+    } else {
+      curPlayer = null; curLen = 0;
+    }
+    if(clutch && ev.kind==='pos'){
+      clutchScored[ev.player] = (clutchScored[ev.player]||0) + 1;
+    }
+    if(ev.kind==='pos'){ if(ev.actingPair==='A') a++; else b++; }
+    else { if(ev.actingPair==='A') b++; else a++; }
+  });
+  return { streaks, clutchScored, halves };
+}
+function computeSessionInsights(session){
+  const finished = session.matches.filter(m=>m.finished);
+  const bestStreak = { player:null, len:0 };
+  const clutchScoredTotal = {};
+  const halvesAgg = {};
+  finished.forEach(m=>{
+    const ins = computeMatchInsights(m);
+    Object.keys(ins.streaks).forEach(p=>{
+      if(ins.streaks[p] > bestStreak.len){ bestStreak.len = ins.streaks[p]; bestStreak.player = p; }
+    });
+    Object.keys(ins.clutchScored).forEach(p=>{
+      clutchScoredTotal[p] = (clutchScoredTotal[p]||0) + ins.clutchScored[p];
+    });
+    Object.keys(ins.halves).forEach(p=>{
+      if(!halvesAgg[p]) halvesAgg[p] = {firstErr:0, firstTotal:0, secondErr:0, secondTotal:0};
+      halvesAgg[p].firstErr += ins.halves[p].firstErr;
+      halvesAgg[p].firstTotal += ins.halves[p].firstTotal;
+      halvesAgg[p].secondErr += ins.halves[p].secondErr;
+      halvesAgg[p].secondTotal += ins.halves[p].secondTotal;
+    });
+  });
+  const fatigue = {};
+  Object.keys(halvesAgg).forEach(p=>{
+    const h = halvesAgg[p];
+    if(h.firstTotal>=2 && h.secondTotal>=2){
+      const firstRate = h.firstErr/h.firstTotal, secondRate = h.secondErr/h.secondTotal;
+      if(secondRate - firstRate >= 0.15) fatigue[p] = {firstRate, secondRate};
+    }
+  });
+  let topClutch = null;
+  Object.keys(clutchScoredTotal).forEach(p=>{
+    if(clutchScoredTotal[p]>=2 && (!topClutch || clutchScoredTotal[p]>clutchScoredTotal[topClutch])) topClutch = p;
+  });
+  return { bestStreak, topClutch, clutchCount: topClutch?clutchScoredTotal[topClutch]:0, fatigue };
+}
+
+const STREAK_LINES = [
+  '{עלה|עלתה} על גל אחד גדול — רצף אישי של {len} נקודות רצופות, אי אפשר היה לעצור {אותו|אותה}.',
+  '{len} נקודות ברצף בלי הפסקה — מצב טהור של "תביאו לי את הכדור, אני אסגור".',
+  'רצף מטורף של {len} נקודות — מי שהיה בצד השני פשוט חיכה שזה ייגמר.',
+];
+const CLUTCH_LINES = [
+  'וכשהמצב נהיה מתוח (דויס/40-40), זה מי שסגר הכי הרבה נקודות בעצמו — {count} נקודות מכריעות אישיות. קור רוח אמיתי.',
+  'תואר "{הסוגר|הסוגרת}" של המפגש — {count} נקודות אישיות דווקא ברגעים הכי לחוצים.',
+  '{count} נקודות אישיות בדיוק כשהכל היה על הכף. לא כולם מסוגלים לזה.',
+];
+const FATIGUE_LINES = [
+  'מגמת עייפות ברורה — קצב הטעויות {שלו|שלה} עלה מ-{first}% ל-{second}% במחצית השנייה של המשחקים. אולי כדאי לבדוק כושר.',
+  'המחצית הראשונה הייתה חדה בהרבה מהשנייה ({first}%→{second}% טעויות) — נראה שהמצבר נגמר קצת מהר.',
+  'קצב הטעויות {שלו|שלה} עלה משמעותית במחצית השנייה ({first}%→{second}%). קצת אימוני סיבולת לא יזיקו.',
+];
+
+/* ---- Personality phrase banks (Mad-libs style, seeded for variety per session) ---- */
+const SUM_OPENERS = [
+  'עוד מפגש נכנס לספרי ההיסטוריה של הליגה — עם כל הדרמה, ההזעה וכמה כדורים שממש לא היו צריכים לצאת מהמגרש.',
+  'השמש שקעה, הרקטות התעייפו, והגיע הזמן לנתח מה באמת קרה היום על הקווים.',
+  'מפגש נוסף מאחורינו, וכרגיל — מישהו כבר מספר על זה כאילו ניצח בגמר ווימבלדון.',
+  'הכדורים עפו, האגו התנפח, והנה הסיכום הרשמי (עם קורטוב ציניות) של היום.',
+  'עוד יום במגרש, עוד סיפורים לספר בקבוצת הוואטסאפ. הנה מה שבאמת קרה, לפי המספרים — בלי לרכך לאף אחד.',
+];
+const SUM_CLOSINGS = [
+  'בשורה התחתונה: יש מי שממריא, יש מי שנתקע, ויש מי שפשוט בא לזוז קצת. נתראה במפגש הבא — מי שהפסיד היום, יש לו זמן להתכונן לנקמה.',
+  'המגרש לא משקר — המספרים מדברים בעד עצמם, גם אם האגו של חלקנו חושב אחרת. תתכוננו למפגש הבא, כי מישהו כאן צריך לתקן כבוד.',
+  'וכך, בין ניצחון צמוד לטעות מיותרת, עוד מפגש מסתיים והליגה ממשיכה להתפתח. הזיכרון קצר, האגו ארוך.',
+  'סוגרים את המפגש עם עוד כמה סיפורים לגיטימיים ועוד כמה שיתנפחו עם הזמן. עד הפעם הבאה — תתאמנו, יש כאן מוניטין לשמור.',
+];
+const WIN_MULTI = [
+  'עונת להיטים אמיתית — {ניצח|ניצחה} עם {count} שותפים שונים ({partners}), כלומר אין {לו|לה} באמת "שותף קבוע", {הוא|היא} פשוט {טוב|טובה} בכל מקום. יתר השחקנים מוזמנים להתחיל לדאוג.',
+  '{הוכיח|הוכיחה} ש{הוא לא תלוי|היא לא תלויה} באף אחד — {ניצח|ניצחה} גם עם {partners}. מי שמשחק {נגדו|נגדה} כדאי שיתכונן, ומי ש{משחק|משחקת} {איתו|איתה} — פשוט תיהנו מהטרמפ.',
+  '{אמין|אמינה} כמו שעון שוויצרי: {ניצח|ניצחה} לצד {partners}, בלי קשר למי {עמד|עמדה} {לידו|לידה}. שאר הליגה יכולה להתחיל להתאמן קצת יותר.',
+];
+const WIN_SINGLE = [
+  '{ניצח|ניצחה} {timesText} לצד {partner} — נראה שיש כאן התחלה של קשר קטלני על המגרש. שאר הזוגות, תתחילו לתכנן אסטרטגיה.',
+  'הצמד עם {partner} עבד היום — {timesText}, ורק ההיסטוריה תגיד אם זו כימיה אמיתית או מזל. בינתיים, מגיע להם קצת יהירות.',
+  '{timesTextCap} עם {partner}. בואו עוד לא נקרא לזה שושלת, אבל שאר הליגה כבר יכולה להתחיל לזוז בכיסא.',
+];
+const NO_WIN = [
+  'אפס ניצחונות ב-{matches} משח{matchesSuffix} היום. אם היה מבחן בפאדל, זה היה נכשל בגדול, עם הערה בתעודה. אולי שקלול נקודות זה לא באמת {שלו|שלה}.',
+  'לא היה זה היום {שלו|שלה} — {matches} משח{matchesSuffix}, אפס ניצחונות. שאר הליגה בטח נהנתה מזה, נגיד ככה, ואולי אפילו צילמו.',
+  'המספרים אכזריים: {matches} משח{matchesSuffix} ואף לא ניצחון אחד. בקצב הזה, כדאי לשקול תפקיד קבוע כמחזיק מגבות בצד המגרש.',
+];
+const CLOSE_MATCH = [
+  '{היה|הייתה} בלב הדרמה של המשחק הכי צמוד היום ({score}) — מהסוג שגורם לכולם לקום מהספסל ולצעוק על כל נקודה.',
+  '{מעורב|מעורבת} במותחן של המפגש: {score}. עצבים חשופים, כבוד על הכף.',
+  'חלק מהרגע הכי מתוח של היום — משחק שהוכרע רק ב-{score}. מי שהפסיד שם עוד מתאושש בבית.',
+];
+const ERR_NET = [
+  'הרשת אכלה {negNet} מתוך {negT} הכדורים {שלו|שלה} היום — מישהו פה משחק קצת יותר פינג פונג ופחות פאדל, בעצם בכלל לא פאדל.',
+  'הרשת הייתה האויב הכי גדול {שלו|שלה}: {negNet} מתוך {negT} טעויות נחתו בדיוק שם. בקצב הזה, הרשת מגיעה לה MVP של הערב.',
+  '{negNet} מתוך {negT} הטעויות הלכו לרשת. טיפ חינם וקצת אכזרי: קצת יותר גובה בהגשה, הרבה פחות תלונות אחרי.',
+];
+const ERR_GLASS = [
+  'רוב הטעויות {שלו|שלה} ({negGlass} מתוך {negT}) היו כדורי זכוכית/החוצה — עוצמה יש בשפע, שליטה עוד לא הומצאה.',
+  'הזכוכית ספגה היום {negGlass} מתוך {negT} הטעויות {שלו|שלה}. חוזק זה יפה, אבל בלי כיוון זה סתם מסוכן לשכנים.',
+  '{negGlass} מתוך {negT} הטעויות {שלו|שלה} טסו החוצה. מרשים באורך, אפס תועלת בפועל — טילים בלי GPS.',
+];
+const ERR_MIXED = [
+  '{טעה|טעתה} {negT} פעמים היום, בערך חצי-חצי בין רשת לזכוכית — עקביות בטעויות היא גם סוג של כישרון, לא כזה שראוי לחגוג.',
+  '{negT} טעויות בסך הכול, מפוזרות בין רשת לזכוכית. יום קשה, אבל היריבים בטח נהנו מכל רגע.',
+];
+const TREND_UP = [
+  'מגמה ברורה כלפי מעלה לעומת מפגש #{prevNum} — מישהו כאן התאמן, ושאר הליגה כדאי שתשים לב לפני שמאוחר מדי.',
+  'שיפור מורגש לעומת מפגש #{prevNum}. ממשיכים ככה ומגיעים רחוק — ומביכים כמה אנשים בדרך, ובצדק.',
+  'בעלייה נאה לעומת מפגש #{prevNum} — נראה שזה לא מקרי, וזה קצת מפחיד את שאר המשתתפים, כמו שצריך.',
+];
+const TREND_DOWN = [
+  'ירידה קלה לעומת מפגש #{prevNum} — קורה גם לטובים ביותר, אבל שאר הליגה בטח לא מתנצלת על ההנאה מזה.',
+  'לא בדיוק המפגש הכי חד לעומת #{prevNum}. הכתר לא רק רועד — הוא כבר קצת גולש הצידה.',
+  'מגמה בכיוון ההפוך לעומת מפגש #{prevNum}. אולי פשוט יום פחות טוב, אולי זו פשוט המציאות עכשיו.',
+];
+const TREND_STABLE = [
+  'רמה יציבה, כמעט זהה למפגש #{prevNum} — עקביות היא שם המשחק, גם אם זה לא הכי מרשים לצפות בו.',
+  'לא עלה ולא ירד — בערך אותו הדבר כמו במפגש #{prevNum}. יציב, בטוח, ולגמרי חסר דרמה.',
+];
+const DEBUT_LINE = [
+  'מפגש הבכורה {שלו|שלה} בליגה — ברוכים הבאים, קדימה תראו לנו מה יש לכם. הליגה כבר קצת עצבנית, ובצדק.',
+  'היום זו הפעם הראשונה {שלו|שלה} על המגרש שלנו. נחכה לראות אם זו התחלה של אלוף או סתם עוד שם שיישכח מהר.',
+];
+const CARRIED_LINES = [
+  'בואו נהיה כנים — הניצחונות הערב היו בעיקר בזכות {partner}, לא {שלו|שלה}. {הוא|היא} רק {חתם|חתמה} על התוצאה ונהנה מהתמונה בסוף.',
+  'למרות התוצאה הטובה, התרומה האישית {שלו|שלה} הייתה חלשה בהרבה מזו של {partner} — מישהו סחב את הצמד הערב, וזה בבירור לא {הוא|היא}. אולי כדאי לשלוח מתנה קטנה.',
+  '{ניצח|ניצחה} הערב, אבל בכנות — רוב הזכות שייכת ל{partner}. {הוא|היא} בסך הכול {היה|הייתה} שם לתמונת הקבוצה.',
+];
+const CARRIER_LINES = [
+  '{סחב|סחבה} את הצמד עם {partner} כל הערב — בלי המאמץ {שלו|שלה}, התוצאה הייתה נראית ממש אחרת, וכנראה מביכה.',
+  'האמת? {הוא|היא} {היה|הייתה} המנוע היחיד של הצמד עם {partner} הערב — {נשא|נשאה} את המשקל הכי כבד בעוד השותף בעיקר צפה.',
+  'ניצחונות יפים, אבל תודו — {הוא|היא} {עשה|עשתה} כאן את כל העבודה מול {partner}, שבעיקר נהנה מהנוף.',
+];
+const TREND_SUMMARY_LINES = {
+  up: [
+    'ב-{sessions} המפגשים האחרונים {נמצא|נמצאת} במגמת עלייה ברורה — ממוצע נטו {avgNet} לאורך התקופה, עם {winRate}% ניצחונות. מישהו כאן מתאמן, ושאר הליגה כדאי שתתחיל להזיע.',
+    'הכיוון ברור: למעלה. ממוצע {avgNet} נטו ב-{sessions} מפגשים אחרונים, {winRate}% ניצחונות — {משתפר|משתפרת} מפגש אחרי מפגש, וזה מתחיל להיות קצת מלחיץ לשאר.',
+    'מגמה חיובית לאורך {sessions} מפגשים — {avgNet} נטו בממוצע, {winRate}% ניצחונות. משהו כאן עובד, ולא בטוח שכולם שמחים על זה.',
+  ],
+  down: [
+    'ב-{sessions} המפגשים האחרונים המגמה קצת יורדת — ממוצע נטו {avgNet}, {winRate}% ניצחונות. קורה גם לטובים ביותר, אבל הכתר מתחיל לרעוד.',
+    'לא התקופה הכי חדה — ממוצע {avgNet} נטו על פני {sessions} מפגשים, עם ירידה מורגשת. אולי זמן לחזור לשגרת אימונים לפני שמישהו אחר עוקף.',
+    'מגמה בכיוון ההפוך לאחרונה — {avgNet} נטו בממוצע על {sessions} מפגשים, {winRate}% ניצחונות. הבא בתור יהיה שונה, כי ככה זה לא יכול להמשיך.',
+  ],
+  stable: [
+    'עקבי כמו שעון על פני {sessions} מפגשים אחרונים — ממוצע נטו {avgNet}, {winRate}% ניצחונות. לא עולה ולא יורד, פשוט יציב — משעמם אבל אפקטיבי.',
+    'ב-{sessions} המפגשים האחרונים {שומר|שומרת} על רמה יציבה — ממוצע {avgNet} נטו, {winRate}% ניצחונות. שאר הליגה יכולה לכייל את עצמה {מולו|מולה}.',
+    'יציבות היא שם המשחק — {avgNet} נטו בממוצע על פני {sessions} מפגשים, {winRate}% ניצחונות. לא הכי דרמטי, אבל תמיד שם.',
+  ],
+  early: [
+    'עדיין מוקדם מדי לקבוע מגמה — רק {sessions} מפגש{sessionsSuffix} בקופה. עוד נראה אם זה כישרון אמיתי או מזל של מתחילים.',
+  ],
+};
+const INTRO_STATS = [
+  'היום {שיחק|שיחקה} {matches} משח{matchesSuffix} — {pos} נקודות זכות מול {neg} נקודות חובה, הפרש {diff}. יבש, ענייני, בלי מקום לוויכוחים.',
+  '{matches} משח{matchesSuffix} על השעון, {pos} זכות מול {neg} חובה. הפרש {diff} — שהמספרים ידברו, {הוא|היא} כבר {דיבר|דיברה} מספיק על המגרש.',
+  'קוד המספרים של היום: {matches} משח{matchesSuffix}, {pos} זכות, {neg} חובה, הפרש {diff}. לא צריך תואר בסטטיסטיקה בשביל להבין מי {ניצח|ניצחה} כאן.',
+];
+const PARTNERS_ONE = [
+  '{שיחק|שיחקה} לצד {partner} לכל אורך המפגש — מעין נישואים זמניים על המגרש, בלי הסכם ממון.',
+  'הצמד הבלעדי של היום: {partner}. בלי בגידות, בלי דרמות, נאמנות מופתית.',
+  '{היה|הייתה} עם {partner} בכל משחק — שותפות שלא התפרקה אפילו לרגע.',
+];
+const PARTNERS_MULTI = [
+  '{התחלף|התחלפה} בין כמה זוגות היום — {שיחק|שיחקה} לצד {partners}. אין נאמנות במגרש הזה, יש רק ניצחונות.',
+  '{עבר|עברה} בין שותפים כמו באפליקציית דייטינג: {partners}. עדיין {מחפש|מחפשת} את השידוך המושלם.',
+  '{עבר|עברה} בין כמה צמדים היום: {partners} — {גמיש|גמישה} מספיק בשביל לשחק עם כולם.',
+];
+
+function renderSummarySubview(session){
+  __pickUsage = new Map(); // fresh anti-repeat tracking for this summary render
+  const finishedMatches = session.matches.filter(m=>m.finished);
+  const stats = computeSessionPlayerStats(session);
+  const names = session.playersPresent.slice();
+  const seed = session.id;
+  const notes = (session.notes||'').trim();
+  const insights = computeSessionInsights(session);
+
+  // ---- 1. Match results ----
+  let resultsHtml = finishedMatches.length
+    ? finishedMatches.map(m=>{
+        const winPair = m.winner==='A'?m.pairA:m.pairB;
+        const losePair = m.winner==='A'?m.pairB:m.pairA;
+        const winPts = m.winner==='A'?m.pointsA:m.pointsB;
+        const losePts = m.winner==='A'?m.pointsB:m.pointsA;
+        return `<p>${esc(winPair.join(' + '))} ניצחו את ${esc(losePair.join(' + '))} ${winPts}:${losePts}${m.star?' ⭐':''}.</p>`;
+      }).join('')
+    : `<p class="hint">לא נרשמו משחקים שהושלמו במפגש זה.</p>`;
+
+  // ---- 2. Ranking for the day (net points, tie-break wins) ----
+  const ranked = names.filter(n=> stats[n] && stats[n].matches>0).sort((a,b)=>{
+    const na = stats[a].pos - stats[a].neg, nb = stats[b].pos - stats[b].neg;
+    if(nb!==na) return nb-na;
+    return stats[b].wins - stats[a].wins;
+  });
+  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣'];
+
+  // ---- 3. Per-player analysis ("מה אפשר להסיק") — data-driven but with personality ----
+  const IMPAIRMENT_KEYWORDS = ['פצע','פציע','פגע','פגיע','נחבל','כאב','כואב','חולה','לא טוב','עייף','מותש','נקע','תפס','קדחת','מצונן','חום'];
+  const noteSentences = notes ? notes.split(/[.!?\n]+/).map(s=>s.trim()).filter(Boolean) : [];
+  const noteAttached = new Set();
+  let analysisHtml = '';
+  ranked.forEach(n=>{
+    const st = stats[n];
+    const parts = [];
+    // Only the sentence(s) that actually mention this player — not the whole notes blob — and only
+    // treat it as an excuse that should soften the data-driven read if it sounds like an injury/illness/fatigue note.
+    const myNoteSentences = noteSentences.filter(s=>s.includes(n));
+    const mentionedInNotes = myNoteSentences.length>0;
+    const impaired = mentionedInNotes && myNoteSentences.some(s=> IMPAIRMENT_KEYWORDS.some(k=>s.includes(k)));
+
+    // Baseline sentences that always appear, so every player gets a fuller writeup regardless of which
+    // situational insights below happen to apply to them.
+    const diff = st.pos - st.neg;
+    const diffText = (diff>=0?'+':'')+diff;
+    parts.push(tpl(pick(INTRO_STATS, seed+n+'in'), {matches:st.matches, matchesSuffix: st.matches===1?'ק':'קים', pos:st.pos, neg:st.neg, diff:diffText}));
+
+    const allPartners = allPartnersFor(n, finishedMatches);
+    if(allPartners.length===1){
+      parts.push(tpl(pick(PARTNERS_ONE, seed+n+'p1'), {partner:esc(allPartners[0])}));
+    } else if(allPartners.length>1){
+      parts.push(tpl(pick(PARTNERS_MULTI, seed+n+'pm'), {partners:allPartners.map(esc).join(', ')}));
+    }
+
+    const partners = partnersWonWith(n, finishedMatches);
+    if(st.wins>0){
+      if(partners.length>=2){
+        parts.push(tpl(pick(WIN_MULTI, seed+n+'wm'), {count:partners.length, partners:partners.map(esc).join(' ו-')}));
+      } else if(partners.length===1){
+        const timesText = st.wins>1 ? `${st.wins} פעמים` : 'פעם אחת';
+        const timesTextCap = st.wins>1 ? `${st.wins} ניצחונות` : 'ניצחון אחד';
+        parts.push(tpl(pick(WIN_SINGLE, seed+n+'ws'), {timesText, timesTextCap, partner:esc(partners[0])}));
+      }
+    } else {
+      parts.push(tpl(pick(NO_WIN, seed+n+'nw'), {matches:st.matches, matchesSuffix: st.matches===1?'ק':'קים'}));
+    }
+
+    const cm = closestMatchFor(n, finishedMatches);
+    if(cm && cm.margin<=1){
+      parts.push(tpl(pick(CLOSE_MATCH, seed+n+'cm'), {score:`${cm.m.pointsA}:${cm.m.pointsB}`}));
+    }
+
+    // Was this player mostly carried by a partner in their wins tonight, or did they do the carrying?
+    const theirWins = finishedMatches.filter(m=> m.winner && (m.winner==='A'?m.pairA:m.pairB).includes(n));
+    let carriedCount=0, carrierCount=0, lastCarriedBy=null, lastCarriedPartner=null;
+    theirWins.forEach(m=>{
+      const c = detectMatchCarry(m);
+      if(!c) return;
+      if(c.carried===n){ carriedCount++; lastCarriedBy=c.carrier; }
+      if(c.carrier===n){ carrierCount++; lastCarriedPartner=c.carried; }
+    });
+    if(carriedCount>0 && carriedCount>carrierCount){
+      parts.push(tpl(pick(CARRIED_LINES, seed+n+'cd'), {partner: esc(lastCarriedBy)}));
+    } else if(carrierCount>0 && carrierCount>carriedCount){
+      parts.push(tpl(pick(CARRIER_LINES, seed+n+'cr'), {partner: esc(lastCarriedPartner)}));
+    }
+
+    const negT = st.negNet + st.negGlass;
+    if(negT>=2 && !impaired){
+      if(st.negNet > st.negGlass*1.5) parts.push(tpl(pick(ERR_NET, seed+n+'en'), {negNet:st.negNet, negT}));
+      else if(st.negGlass > st.negNet*1.5) parts.push(tpl(pick(ERR_GLASS, seed+n+'eg'), {negGlass:st.negGlass, negT}));
+      else parts.push(tpl(pick(ERR_MIXED, seed+n+'em'), {negT}));
+    }
+
+    if(insights.bestStreak.player===n && insights.bestStreak.len>=3){
+      parts.push(tpl(pick(STREAK_LINES, seed+n+'sk'), {len:insights.bestStreak.len}));
+    }
+    if(insights.topClutch===n){
+      parts.push(tpl(pick(CLUTCH_LINES, seed+n+'cl'), {count:insights.clutchCount}));
+    }
+    if(insights.fatigue[n] && !impaired){
+      parts.push(tpl(pick(FATIGUE_LINES, seed+n+'ft'), {
+        first: Math.round(insights.fatigue[n].firstRate*100),
+        second: Math.round(insights.fatigue[n].secondRate*100)
+      }));
+    }
+
+    const prev = findPreviousSessionStatsForPlayer(n, session.number);
+    if(!impaired){
+      if(prev){
+        const curNet = (st.pos-st.neg)/st.matches;
+        const diff2 = curNet - prev.net;
+        if(diff2 > 0.4) parts.push(tpl(pick(TREND_UP, seed+n+'tu'), {prevNum:prev.sessionNumber}));
+        else if(diff2 < -0.4) parts.push(tpl(pick(TREND_DOWN, seed+n+'td'), {prevNum:prev.sessionNumber}));
+        else parts.push(tpl(pick(TREND_STABLE, seed+n+'ts'), {prevNum:prev.sessionNumber}));
+      } else {
+        parts.push(pick(DEBUT_LINE, seed+n+'db'));
+      }
+    }
+
+    // Weave the note sentence(s) that mention this player directly into the writeup, as plain context —
+    // not framed as "according to the note that was recorded". Only add the "so don't read too much into
+    // the numbers" caveat when the note actually sounds like an injury/illness/fatigue excuse; a note that's
+    // just a fun fact (e.g. "old friends") shouldn't be used to wave away their stats.
+    if(mentionedInNotes && !noteAttached.has(n)){
+      noteAttached.add(n);
+      const noteText = esc(myNoteSentences.join('. '));
+      parts.push(impaired ? `${noteText} — ולכן קשה להסיק מסקנות חדות מהנתונים {שלו|שלה} היום.` : `${noteText}.`);
+    }
+
+    const g = getGender(n);
+    analysisHtml += `<p><strong>${esc(n)}</strong> — ${parts.map(p=>degender(p,g)).join(' ')}</p>`;
+  });
+  names.filter(n=> !stats[n] || stats[n].matches===0).forEach(n=>{
+    analysisHtml += `<p><strong>${esc(n)}</strong> — ${degender('{הגיע|הגיעה} למפגש אך {לא נכנס|לא נכנסה} למשחק הפעם.', getGender(n))}</p>`;
+  });
+
+  // if the note mentions someone who wasn't captured above (e.g. present but no matches), still surface it once
+  if(notes && !ranked.some(n=>noteAttached.has(n))){
+    // no player name matched inside the note — show it as a general callout instead
+  }
+
+  // ---- 4. Trend ranking list ----
+  let rankHtml = ranked.map((n,i)=>{
+    const st = stats[n];
+    const net = st.pos - st.neg;
+    return `<p>${medals[i]||(i+1)+'.'} <strong>${esc(n)}</strong> — נטו ${net>=0?'+':''}${net}, ${st.wins} נצחונות</p>`;
+  }).join('');
+
+  // ---- 5. Opener + Closing ----
+  const opener = pick(SUM_OPENERS, seed+'o');
+  const closing = ranked.length>=2
+    ? `${esc(ranked[0])} ו-${esc(ranked[1])} מובילים את התמונה של המפגש הזה${ranked.length>2?', כשהשאר מנסים לצמצם פערים. ':'. '}${pick(SUM_CLOSINGS, seed+'c')}`
+    : pick(SUM_CLOSINGS, seed+'c');
+
+  const stars = session.matches.filter(m=>m.star);
+  let starsHtml = stars.length ? stars.map(m=>{
+    const win = m.winner==='A'?m.pairA:m.pairB;
+    return `<p>⭐ <strong>${esc(win.join(' ו-'))}</strong> סגרו משחק בניצחון נקי (40-0) — פשוט לא השאירו סיכוי.</p>`;
+  }).join('') : '';
+
+  const notesHtml = notes ? `<div class="card" id="notesCard"><h2>📝 הערות מהמפגש</h2><p class="hint" style="margin-bottom:0;">${esc(notes)}</p></div>` : '';
+
+  const rows = names.slice().sort((a,b)=> ((stats[b]?.pos||0)-(stats[b]?.neg||0))-((stats[a]?.pos||0)-(stats[a]?.neg||0)));
+  let tableRows = rows.map(n=>{
+    const st = stats[n] || {pos:0,negNet:0,negGlass:0,neg:0,wins:0,matches:0};
+    const diff = st.pos - st.neg;
+    return `<tr><td>${esc(n)}</td><td>${st.wins}</td><td class="pos-n">+${st.pos}</td><td class="neg-n">-${st.neg}</td><td>${diff>=0?'+':''}${diff}</td><td>🥅${st.negNet} 🪟${st.negGlass}</td></tr>`;
+  }).join('');
+
+  // ---- 6. Trend summary — a second, separate summary based on the last few sessions, not just tonight ----
+  const TREND_WINDOW = 5;
+  const trendSessions = computeTrendWindow(session.number, TREND_WINDOW);
+  const trendStats = computeTrendStats(trendSessions);
+  const trendRanked = Object.keys(trendStats).sort((a,b)=>
+    (trendStats[b].netSum/trendStats[b].sessions) - (trendStats[a].netSum/trendStats[a].sessions));
+  let trendHtml = trendRanked.length ? trendRanked.map((n,i)=>{
+    const t = trendStats[n];
+    const avgNet = t.netSum / t.sessions;
+    const avgNetText = (avgNet>=0?'+':'')+avgNet.toFixed(1);
+    const winRate = t.matches ? Math.round(t.wins/t.matches*100) : 0;
+    let sentence;
+    if(t.sessions < 2){
+      sentence = tpl(pick(TREND_SUMMARY_LINES.early, seed+n+'te'), {sessions:t.sessions, sessionsSuffix: t.sessions===1?'':'ים'});
+    } else {
+      const half = Math.max(1, Math.floor(t.perSessionNet.length/2));
+      const early = t.perSessionNet.slice(0,half).reduce((a,b)=>a+b,0)/half;
+      const late = t.perSessionNet.slice(-half).reduce((a,b)=>a+b,0)/half;
+      let dir = 'stable';
+      if(t.sessions>=3){
+        if(late-early > 1) dir='up';
+        else if(late-early < -1) dir='down';
+      }
+      sentence = tpl(pick(TREND_SUMMARY_LINES[dir], seed+n+'t'+dir), {sessions:t.sessions, avgNet:avgNetText, winRate});
+    }
+    const g = getGender(n);
+    return `<p>${medals[i]||(i+1)+'.'} <strong>${esc(n)}</strong> — ${degender(sentence,g)}</p>`;
+  }).join('') : '<p class="hint">אין עדיין מספיק נתונים למגמה.</p>';
+
+  const isViewingLive = !viewingPastSessionId;
+  return `
+  <div id="summaryContent">
+  <div class="card">
+    <h2>סיכום מפגש #${session.number}</h2>
+    <p class="hint">${fmtDate(session.date)} · ${finishedMatches.length} משחקים · ${session.playersPresent.length} שחקנים</p>
+    <div class="summary-text"><p>${opener}</p></div>
+  </div>
+  <div class="card">
+    <h2>תוצאות המשחקים במפגש</h2>
+    <div class="summary-text">${resultsHtml}${starsHtml}</div>
+  </div>
+  ${notesHtml}
+  <div class="card">
+    <h2>מה אפשר להסיק?</h2>
+    <div class="summary-text">${analysisHtml}<p style="margin-top:14px;">${closing}</p></div>
+  </div>
+  <div class="card">
+    <h2>דירוג מגמה (לפי המפגש הזה בלבד)</h2>
+    <div class="summary-text">${rankHtml || '<p class="hint">אין עדיין נתונים לדירוג.</p>'}</div>
+  </div>
+  <div class="card">
+    <h2>טבלת המפגש</h2>
+    <table class="stat-table">
+      <thead><tr><th>שחקן/ית</th><th>נצחונות</th><th>נק׳ +</th><th>נק׳ -</th><th>הפרש</th><th>פירוט טעויות</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h2>📈 סיכום מגמתי — ${trendSessions.length} מפגשים אחרונים</h2>
+    <p class="hint">לא רק הערב — איך כל אחד/ת נראה/ית לאורך התקופה האחרונה.</p>
+    <div class="summary-text">${trendHtml}</div>
+  </div>
+  </div>
+  <button class="btn accent block" onclick="copySummaryToClipboard()">📋 העתקת הסיכום לשליחה בוואטסאפ</button>
+  <button class="btn accent block" style="margin-top:8px;" onclick="shareSessionImage('${session.id}')">📸 שיתוף כתמונה</button>
+  <button class="btn ghost block" onclick="closeSummary('${session.id}', ${isViewingLive})">← חזרה לדף הבית</button>
+  `;
+}
+// Scrapes the already-rendered summary cards and converts them into WhatsApp-friendly plain text
+// (​*bold*​ headers/names, line breaks instead of tags), so the text always matches exactly what's on screen.
+function copySummaryToClipboard(){
+  const container = document.getElementById('summaryContent');
+  if(!container) return;
+  const cards = container.querySelectorAll('.card');
+  const blocks = [];
+  cards.forEach(card=>{
+    if(card.querySelector('table')) return; // the raw stats table doesn't translate well to plain text
+    if(card.id==='notesCard') return; // notes stay on-screen only, not copied into the WhatsApp text
+    const h2 = card.querySelector('h2');
+    const hint = card.querySelector(':scope > .hint');
+    const body = card.querySelector('.summary-text');
+    const lines = [];
+    if(h2) lines.push('*'+h2.textContent.trim()+'*');
+    if(hint) lines.push(hint.textContent.trim());
+    if(body){
+      let html = body.innerHTML;
+      html = html.replace(/<strong>(.*?)<\/strong>/gi, '*$1*');
+      html = html.replace(/<\/p>\s*<p[^>]*>/gi, '\n');
+      html = html.replace(/<p[^>]*>/gi, '').replace(/<\/p>/gi, '');
+      html = html.replace(/<br\s*\/?>/gi, '\n');
+      html = html.replace(/<[^>]+>/g, '');
+      const ta = document.createElement('textarea');
+      ta.innerHTML = html;
+      const text = ta.value.trim();
+      if(text) lines.push(text);
+    }
+    if(lines.length) blocks.push(lines.join('\n'));
+  });
+  const finalText = ('🎾 '+blocks.join('\n\n')).trim();
+  const done = ()=> toast('הסיכום הועתק! אפשר להדביק בוואטסאפ');
+  const fail = ()=> toast('לא הצלחנו להעתיק אוטומטית — אפשר לסמן ולהעתיק ידנית');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(finalText).then(done).catch(()=>{
+      try{
+        const ta2 = document.createElement('textarea');
+        ta2.value = finalText;
+        ta2.style.position='fixed'; ta2.style.opacity='0';
+        document.body.appendChild(ta2); ta2.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta2);
+        done();
+      }catch(e){ fail(); }
+    });
+  } else {
+    try{
+      const ta2 = document.createElement('textarea');
+      ta2.value = finalText;
+      ta2.style.position='fixed'; ta2.style.opacity='0';
+      document.body.appendChild(ta2); ta2.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta2);
+      done();
+    }catch(e){ fail(); }
+  }
+}
+function closeSummary(sid, wasLive){
+  if(wasLive) state.currentSessionId = null;
+  viewingPastSessionId = null;
+  saveState(); render();
+}
+// Draws a shareable "story card" PNG summarizing tonight's session — top performer, results, and
+// a peek at the league table — styled to match the app, for sharing straight to WhatsApp status/groups.
+function shareSessionImage(sid){
+  const session = state.sessions.find(s=>s.id===sid);
+  if(!session) return;
+  const finishedMatches = session.matches.filter(m=>m.finished);
+  const stats = computeSessionPlayerStats(session);
+  const ranked = session.playersPresent.filter(n=> stats[n] && stats[n].matches>0)
+    .sort((a,b)=> ((stats[b].pos-stats[b].neg)-(stats[a].pos-stats[a].neg)));
+
+  const W=1080, H=1350;
+  const canvas = document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx = canvas.getContext('2d');
+
+  const bgGrad = ctx.createLinearGradient(0,0,0,H);
+  bgGrad.addColorStop(0,'#0A3A34'); bgGrad.addColorStop(1,'#0E1A20');
+  ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
+
+  ctx.textAlign='right'; ctx.direction='rtl';
+  ctx.fillStyle='#F3F1E7'; ctx.font='bold 54px Arial';
+  ctx.fillText('ליגת הפאדל 🎾', W-60, 110);
+  ctx.fillStyle='#94ADB2'; ctx.font='30px Arial';
+  ctx.fillText(`מפגש #${session.number} · ${fmtDate(session.date)}`, W-60, 160);
+
+  // Card: top performer
+  if(ranked.length){
+    const top = ranked[0];
+    const diff = stats[top].pos - stats[top].neg;
+    ctx.fillStyle='#152A30';
+    roundRect(ctx, 60, 210, W-120, 220, 24); ctx.fill();
+    ctx.fillStyle='#F0C24B'; ctx.font='bold 36px Arial';
+    ctx.fillText('🏆 שחקן/ית המפגש', W-100, 270);
+    ctx.fillStyle='#D8EA4B'; ctx.font='bold 64px Arial';
+    ctx.fillText(top, W-100, 350);
+    ctx.fillStyle='#F3F1E7'; ctx.font='30px Arial';
+    ctx.fillText(`${stats[top].wins} ניצחונות · הפרש ${diff>=0?'+':''}${diff}`, W-100, 400);
+  }
+
+  // Card: results
+  ctx.fillStyle='#152A30';
+  const resultsH = 60 + finishedMatches.length*70;
+  roundRect(ctx, 60, 460, W-120, Math.max(resultsH,160), 24); ctx.fill();
+  ctx.fillStyle='#F3F1E7'; ctx.font='bold 34px Arial';
+  ctx.fillText('תוצאות המשחקים', W-100, 520);
+  ctx.font='28px Arial';
+  finishedMatches.slice(0,6).forEach((m,i)=>{
+    const winPair = m.winner==='A'?m.pairA:m.pairB;
+    const losePair = m.winner==='A'?m.pairB:m.pairA;
+    ctx.fillStyle='#D8EA4B';
+    ctx.fillText(`${winPair.join('+')} ${m.star?'⭐':''}`, W-100, 570+i*70);
+    ctx.fillStyle='#94ADB2'; ctx.font='24px Arial';
+    ctx.fillText(`ניצחו את ${losePair.join('+')} ${m.pointsA}:${m.pointsB}`, W-100, 600+i*70);
+    ctx.font='28px Arial';
+  });
+
+  // Card: mini league table (top 5 overall)
+  const league = computeLeagueTable().slice(0,5);
+  const leagueTop = 460 + Math.max(resultsH,160) + 40;
+  ctx.fillStyle='#152A30';
+  roundRect(ctx, 60, leagueTop, W-120, 60+league.length*56, 24); ctx.fill();
+  ctx.fillStyle='#F3F1E7'; ctx.font='bold 34px Arial';
+  ctx.fillText('🏆 טבלת הליגה', W-100, leagueTop+56);
+  const medals=['🥇','🥈','🥉','4.','5.'];
+  ctx.font='28px Arial';
+  league.forEach((r,i)=>{
+    const y = leagueTop+110+i*56;
+    ctx.fillStyle='#F3F1E7';
+    ctx.fillText(`${medals[i]} ${r.name}`, W-100, y);
+    ctx.fillStyle='#94ADB2'; ctx.textAlign='left';
+    ctx.fillText(`${r.points} נק'`, 100, y);
+    ctx.textAlign='right';
+  });
+
+  ctx.fillStyle='#5F7C82'; ctx.font='22px Arial';
+  ctx.fillText('נוצר באפליקציית ליגת הפאדל', W-60, H-40);
+
+  canvas.toBlob(blob=>{
+    const file = new File([blob], `padel-session-${session.number}.png`, {type:'image/png'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:`מפגש פאדל #${session.number}`}).catch(()=>{});
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `padel-session-${session.number}.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+      toast('התמונה הורדה — אפשר לשתף אותה מגלריית התמונות');
+    }
+  }, 'image/png');
+}
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+// Draws a shareable player-card PNG: avatar, profile details, league position, and a couple of headline
+// stats — styled to match the app. Same download/share mechanism as the session card.
+function sharePlayerCardImage(name){
+  const {players} = buildGlobalStats();
+  const st = players[name] || {wins:0,matches:0,pos:0,neg:0,sessions:0,stars:0};
+  const prof = getProfile(name);
+  const league = computeLeagueTable();
+  const rank = league.findIndex(r=>r.name===name)+1;
+  const pct = st.matches ? Math.round(st.wins/st.matches*100) : 0;
+  const diff = st.pos - st.neg;
+  const best = bestSessionFor(name);
+  const rival = topRivalFor(name);
+
+  const W=1080, H=1350;
+  const canvas = document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx = canvas.getContext('2d');
+
+  const bgGrad = ctx.createLinearGradient(0,0,0,H);
+  bgGrad.addColorStop(0,'#0A3A34'); bgGrad.addColorStop(1,'#0E1A20');
+  ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
+
+  ctx.textAlign='center';
+  ctx.fillStyle='#F3F1E7'; ctx.font='bold 40px Arial';
+  ctx.fillText('ליגת הפאדל 🎾', W/2, 90);
+
+  // Avatar circle
+  ctx.beginPath(); ctx.arc(W/2, 260, 110, 0, Math.PI*2);
+  ctx.fillStyle='#152A30'; ctx.fill();
+  ctx.strokeStyle='#D8EA4B'; ctx.lineWidth=5; ctx.stroke();
+  ctx.font='100px Arial';
+  ctx.fillText(prof.avatar||'🎾', W/2, 300);
+
+  ctx.direction='rtl';
+  ctx.fillStyle='#F3F1E7'; ctx.font='bold 64px Arial';
+  ctx.fillText(prof.nickname || name, W/2, 440);
+  if(prof.nickname){
+    ctx.fillStyle='#94ADB2'; ctx.font='30px Arial';
+    ctx.fillText(name, W/2, 480);
+  }
+
+  ctx.fillStyle='#D8EA4B'; ctx.font='bold 34px Arial';
+  ctx.fillText(rank ? `מקום #${rank} בטבלת הליגה` : 'שחקן/ית בליגה', W/2, prof.nickname?540:520);
+
+  // Stats card
+  const statsTop = prof.nickname?590:570;
+  ctx.fillStyle='#152A30';
+  roundRect(ctx, 80, statsTop, W-160, 220, 24); ctx.fill();
+  ctx.textAlign='right';
+  ctx.fillStyle='#F3F1E7'; ctx.font='30px Arial';
+  ctx.fillText(`🏆 ${st.wins} ניצחונות · ${pct}% אחוז ניצחון`, W-120, statsTop+60);
+  ctx.fillText(`📊 ${st.matches} משחקים · הפרש נטו ${diff>=0?'+':''}${diff}`, W-120, statsTop+110);
+  ctx.fillText(`⭐ ${st.stars||0} ניצחונות נקיים · 📅 ${st.sessions||0} מפגשים`, W-120, statsTop+160);
+
+  // Profile details card
+  const profDetails = [];
+  if(prof.racketBrand || prof.racketModel) profDetails.push(`🎾 ${[prof.racketBrand,prof.racketModel].filter(Boolean).join(' ')}`);
+  if(prof.hand) profDetails.push(`✋ יד ${prof.hand}`);
+  if(prof.side) profDetails.push(`📍 צד ${prof.side}`);
+  if(prof.since) profDetails.push(`📅 משחק מ-${prof.since}`);
+  let nextTop = statsTop + 220 + 30;
+  if(profDetails.length){
+    ctx.fillStyle='#152A30';
+    roundRect(ctx, 80, nextTop, W-160, 50+profDetails.length*50, 24); ctx.fill();
+    ctx.font='28px Arial';
+    profDetails.forEach((d,i)=>{
+      ctx.fillStyle='#F3F1E7';
+      ctx.fillText(d, W-120, nextTop+50+i*50);
+    });
+    nextTop += 50+profDetails.length*50 + 30;
+  }
+
+  // Best session / rival card
+  const extras = [];
+  if(best) extras.push(`🌟 המפגש הכי טוב: #${best.sessionNumber} (הפרש ${best.diff>=0?'+':''}${best.diff})`);
+  if(rival) extras.push(`⚔️ יריב/ה מוכר/ת: ${rival.name} (${rival.wins}-${rival.losses})`);
+  if(extras.length){
+    ctx.fillStyle='#152A30';
+    roundRect(ctx, 80, nextTop, W-160, 50+extras.length*50, 24); ctx.fill();
+    ctx.font='28px Arial';
+    extras.forEach((d,i)=>{
+      ctx.fillStyle='#F3F1E7';
+      ctx.fillText(d, W-120, nextTop+50+i*50);
+    });
+  }
+
+  if(prof.catchphrase){
+    ctx.textAlign='center'; ctx.fillStyle='#94ADB2'; ctx.font='italic 30px Arial';
+    ctx.fillText(`"${prof.catchphrase}"`, W/2, H-100);
+  }
+  ctx.fillStyle='#5F7C82'; ctx.font='22px Arial';
+  ctx.fillText('נוצר באפליקציית ליגת הפאדל', W/2, H-40);
+
+  canvas.toBlob(blob=>{
+    const file = new File([blob], `padel-card-${name}.png`, {type:'image/png'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:`כרטיס שחקן — ${name}`}).catch(()=>{});
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `padel-card-${name}.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+      toast('הכרטיס הורד — אפשר לשתף אותו מגלריית התמונות');
+    }
+  }, 'image/png');
+}
+
+/* ======================= STATS VIEW ======================= */
+// League table: win=3 points, loss=0. Ranked by points, then net point difference, then wins.
+function computeLeagueTable(){
+  const {players} = buildGlobalStats();
+  const rows = Object.keys(players).filter(p=>players[p].matches>0).map(p=>{
+    const st = players[p];
+    const losses = st.matches - st.wins;
+    return { name:p, played:st.matches, won:st.wins, lost:losses, points: st.wins*3, diff: st.pos-st.neg };
+  });
+  rows.sort((a,b)=> b.points-a.points || b.diff-a.diff || b.won-a.won);
+  return rows;
+}
+// Head-to-head: for every finished doubles match, each player on side A is credited a "matchup" win/loss
+// against every player on side B (and vice versa) — the natural way to extend 1v1 rivalry tracking to doubles.
+function computeHeadToHead(){
+  const h2h = {}; // h2h[p1][p2] = {wins, losses}
+  allMatches().forEach(m=>{
+    m.pairA.forEach(p1=>{
+      m.pairB.forEach(p2=>{
+        if(!h2h[p1]) h2h[p1] = {};
+        if(!h2h[p1][p2]) h2h[p1][p2] = {wins:0, losses:0};
+        if(!h2h[p2]) h2h[p2] = {};
+        if(!h2h[p2][p1]) h2h[p2][p1] = {wins:0, losses:0};
+        if(m.winner==='A'){ h2h[p1][p2].wins++; h2h[p2][p1].losses++; }
+        else { h2h[p1][p2].losses++; h2h[p2][p1].wins++; }
+      });
+    });
+  });
+  return h2h;
+}
+// A fun, mostly-lighthearted badge board computed from career totals. Badges only appear once a
+// player clears a minimum sample size, so a single lucky/unlucky match doesn't crown or shame anyone.
+// "Loser's curse" — held by the losing pair of the most recently finished match anywhere in the league,
+// until someone else loses a match and takes it over. Pure shame, no upside.
+// The single best session of this player's career, by net points that day. Used on their player card.
+// League standings computed using only matches through `uptoSessionNumber` — used to plot how a
+// player's rank moved over time, not just where they stand today.
+function computeLeagueTableUpTo(uptoSessionNumber){
+  const agg = {};
+  state.sessions.filter(s=>s.finished && s.number<=uptoSessionNumber).forEach(s=>{
+    const stats = computeSessionPlayerStats(s);
+    Object.keys(stats).forEach(p=>{
+      if(stats[p].matches===0) return;
+      if(!agg[p]) agg[p] = {wins:0, matches:0, pos:0, neg:0};
+      agg[p].wins += stats[p].wins;
+      agg[p].matches += stats[p].matches;
+      agg[p].pos += stats[p].pos;
+      agg[p].neg += stats[p].neg;
+    });
+  });
+  const rows = Object.keys(agg).map(p=>({ name:p, points: agg[p].wins*3, diff: agg[p].pos-agg[p].neg, wins: agg[p].wins }));
+  rows.sort((a,b)=> b.points-a.points || b.diff-a.diff || b.wins-a.wins);
+  return rows;
+}
+// Four progression series for a player's chart on their card: net points/session, league rank over
+// time (since session #1, not just a recent window), error rate %, and clutch-scoring %.
+function computeProgressionSeries(name){
+  const sessions = allFinishedSessions();
+  const labels=[], net=[], rank=[], errRate=[], clutchPct=[];
+  sessions.forEach(s=>{
+    const stats = computeSessionPlayerStats(s);
+    const st = stats[name];
+    if(!st || st.matches===0) return;
+    labels.push('מפגש #'+s.number);
+    net.push(+(st.pos-st.neg));
+    const totalPts = st.pos+st.neg;
+    errRate.push(totalPts>0 ? Math.round((st.neg/totalPts)*100) : 0);
+
+    const table = computeLeagueTableUpTo(s.number);
+    const r = table.findIndex(row=>row.name===name)+1;
+    rank.push(r || table.length+1);
+
+    let clutchCount=0;
+    s.matches.filter(m=>m.finished).forEach(m=>{
+      const ins = computeMatchInsights(m);
+      clutchCount += ins.clutchScored[name] || 0;
+    });
+    clutchPct.push(st.pos>0 ? Math.round((clutchCount/st.pos)*100) : 0);
+  });
+  return { labels, net, rank, errRate, clutchPct };
+}
+function bestSessionFor(name){
+  let best=null;
+  state.sessions.filter(s=>s.finished).forEach(s=>{
+    const stats = computeSessionPlayerStats(s);
+    const st = stats[name];
+    if(!st || st.matches===0) return;
+    const diff = st.pos-st.neg;
+    if(!best || diff>best.diff) best = { sessionNumber:s.number, date:s.date, diff, wins:st.wins, matches:st.matches };
+  });
+  return best;
+}
+// The opponent this player has faced the most, and how that rivalry stands — their "biggest nemesis".
+function topRivalFor(name){
+  const h2h = computeHeadToHead();
+  const opponents = h2h[name] ? Object.keys(h2h[name]) : [];
+  let best=null;
+  opponents.forEach(opp=>{
+    const rec = h2h[name][opp];
+    const total = rec.wins+rec.losses;
+    if(total>0 && (!best || total>best.total)) best = { name:opp, wins:rec.wins, losses:rec.losses, total };
+  });
+  return best;
+}
+function getCurseHolders(){
+  const sessionsDesc = state.sessions.slice().sort((a,b)=>b.number-a.number);
+  for(const s of sessionsDesc){
+    const finished = s.matches.filter(m=>m.finished);
+    for(let i=finished.length-1; i>=0; i--){
+      const m = finished[i];
+      const losers = m.winner==='A' ? m.pairB : m.pairA;
+      return { players: losers, sessionNumber: s.number, score: `${m.pointsA}:${m.pointsB}` };
+    }
+  }
+  return null;
+}
+function computeAchievements(){
+  const {players, pairs} = buildGlobalStats();
+  const eligible = Object.keys(players).filter(p=>players[p].matches>=3);
+  const badges = [];
+  function top(list, keyFn, min){
+    let best=null, bestVal=-Infinity;
+    list.forEach(p=>{ const v=keyFn(players[p]); if(v>bestVal && (min===undefined || players[p].matches>=min)){ best=p; bestVal=v; } });
+    return best ? {name:best, value:bestVal} : null;
+  }
+  const mostWins = top(eligible, p=>p.wins);
+  if(mostWins) badges.push({emoji:'🏆', title:'אלוף הליגה', desc:`הכי הרבה ניצחונות בסך הכול — ${mostWins.value}`, player:mostWins.name});
+
+  const bestRate = top(eligible, p=> p.matches? p.wins/p.matches : 0);
+  if(bestRate) badges.push({emoji:'🎯', title:'הכי מדויק/ת', desc:`אחוז ניצחון הכי גבוה — ${Math.round(bestRate.value*100)}%`, player:bestRate.name});
+
+  const mostNet = top(eligible, p=> p.pos-p.neg);
+  if(mostNet) badges.push({emoji:'📈', title:'ההפרש הכי גבוה', desc:`נטו נקודות מצטבר — ${mostNet.value>=0?'+':''}${mostNet.value}`, player:mostNet.name});
+
+  const mostStars = top(eligible, p=>p.stars||0);
+  if(mostStars && mostStars.value>0) badges.push({emoji:'⭐', title:'מלך/ת הניצחונות הנקיים', desc:`${mostStars.value} ניצחונות 40-0`, player:mostStars.name});
+
+  const mostNet_ = top(eligible, p=>p.negNet||0);
+  if(mostNet_ && mostNet_.value>0) badges.push({emoji:'🥅', title:'מלך/ת הרשת', desc:`${mostNet_.value} טעויות רשת בקריירה`, player:mostNet_.name});
+
+  const mostGlass = top(eligible, p=>p.negGlass||0);
+  if(mostGlass && mostGlass.value>0) badges.push({emoji:'🪟', title:'מלך/ת הזכוכית', desc:`${mostGlass.value} כדורים שטסו החוצה`, player:mostGlass.name});
+
+  const mostSessions = top(eligible, p=>p.sessions||0);
+  if(mostSessions) badges.push({emoji:'📅', title:'הכי נאמן/ה לליגה', desc:`${mostSessions.value} מפגשים`, player:mostSessions.name});
+
+  let bestPairKey=null, bestPairVal=-Infinity;
+  Object.keys(pairs).forEach(pk=>{
+    const pr = pairs[pk];
+    if(pr.matches>=3 && pr.wins>bestPairVal){ bestPairVal=pr.wins; bestPairKey=pk; }
+  });
+  if(bestPairKey) badges.push({emoji:'🤝', title:'הצמד הכי מנצח', desc:`${bestPairVal} ניצחונות יחד`, player:pairs[bestPairKey].players.join(' + ')});
+
+  return badges;
+}
+function buildGlobalStats(){
+  const players = {};
+  state.players.forEach(p=> players[p] = {wins:0, matches:0, sessions:0, pos:0, negNet:0, negGlass:0, neg:0, stars:0, partners:{}});
+  const pairs = {};
+  allMatches().forEach(m=>{
+    const winners = m.winner==='A'?m.pairA:m.pairB;
+    [m.pairA, m.pairB].forEach((pair, idx)=>{
+      const isWinner = (idx===0 && m.winner==='A') || (idx===1 && m.winner==='B');
+      const pk = pairKey(pair);
+      if(!pairs[pk]) pairs[pk] = {players:pair, wins:0, matches:0, stars:0, pos:0, neg:0};
+      pairs[pk].matches++;
+      if(isWinner) pairs[pk].wins++;
+      if(m.star && isWinner) pairs[pk].stars++;
+      pair.forEach(p=>{
+        if(!players[p]) players[p]={wins:0,matches:0,sessions:0,pos:0,negNet:0,negGlass:0,neg:0,stars:0,partners:{}};
+        players[p].matches++;
+        players[p].pos += m.individual[p]?.pos||0;
+        players[p].negNet += m.individual[p]?.negNet||0;
+        players[p].negGlass += m.individual[p]?.negGlass||0;
+        players[p].neg = players[p].negNet + players[p].negGlass;
+        pairs[pk].pos += m.individual[p]?.pos||0;
+        pairs[pk].neg += negTotal(m.individual[p]||{negNet:0,negGlass:0});
+        if(isWinner){ players[p].wins++; if(m.star) players[p].stars++; }
+        const partner = pair.find(x=>x!==p);
+        if(!players[p].partners[partner]) players[p].partners[partner]={wins:0,matches:0};
+        players[p].partners[partner].matches++;
+        if(isWinner) players[p].partners[partner].wins++;
+      });
+    });
+  });
+  // Session attendance is counted separately from match stats above, so a player who showed up
+  // but for some reason didn't get into a match that day is still counted as having attended.
+  state.sessions.forEach(s=>{
+    (s.playersPresent||[]).forEach(p=>{
+      if(!players[p]) players[p]={wins:0,matches:0,sessions:0,pos:0,negNet:0,negGlass:0,neg:0,stars:0,partners:{}};
+      players[p].sessions++;
+    });
+  });
+  return {players, pairs};
+}
+function computeClutchGlobalStats(){
+  const matches = allMatches();
+  let deuceCount = 0;
+  const winCounts = {};
+  matches.forEach(m=>{
+    let a=0, b=0, reached=false;
+    m.events.forEach(ev=>{
+      if(isClutch(a,b)) reached = true;
+      if(ev.kind==='pos'){ if(ev.actingPair==='A') a++; else b++; }
+      else { if(ev.actingPair==='A') b++; else a++; }
+    });
+    if(reached){
+      deuceCount++;
+      const winners = m.winner==='A'?m.pairA:m.pairB;
+      winners.forEach(p=> winCounts[p]=(winCounts[p]||0)+1);
+    }
+  });
+  return { deuceCount, totalMatches: matches.length, winCounts };
+}
+
+function renderPlayerCardView(name){
+  const {players} = buildGlobalStats();
+  const st = players[name] || {wins:0,matches:0,pos:0,neg:0,sessions:0,stars:0};
+  const prof = getProfile(name);
+  const league = computeLeagueTable();
+  const rank = league.findIndex(r=>r.name===name)+1;
+  const pct = st.matches ? Math.round(st.wins/st.matches*100) : 0;
+  const diff = st.pos - st.neg;
+  const best = bestSessionFor(name);
+  const rival = topRivalFor(name);
+  const badges = computeAchievements().filter(b=>b.player===name || (b.player||'').split(' + ').includes(name));
+  const g = getGender(name);
+
+  return `<div class="card">
+    <div class="mvp-banner" style="align-items:flex-start;">
+      <div class="trophy" style="font-size:56px;">${esc(prof.avatar)}</div>
+      <div>
+        <div class="name" style="font-size:26px;">${esc(prof.nickname || name)}</div>
+        ${prof.nickname ? `<div class="label" style="margin-bottom:4px;">${esc(name)}</div>` : ''}
+        <div class="label">${rank ? `מקום #${rank} בטבלת הליגה` : 'עדיין לא בטבלה'} · ${st.wins} ניצחונות · ${pct}% אחוז ניצחון</div>
+      </div>
+    </div>
+    <div class="manual-grid" style="margin-top:8px;">
+      ${prof.racketBrand || prof.racketModel ? `<div class="field"><label>מחבט</label><div>${esc([prof.racketBrand,prof.racketModel].filter(Boolean).join(' '))}</div></div>` : ''}
+      ${prof.hand ? `<div class="field"><label>יד דומיננטית</label><div>${esc(prof.hand)}</div></div>` : ''}
+      ${prof.side ? `<div class="field"><label>צד מועדף</label><div>${esc(prof.side)}</div></div>` : ''}
+      ${prof.since ? `<div class="field"><label>משחק מ-</label><div>${esc(prof.since)}</div></div>` : ''}
+    </div>
+    ${prof.catchphrase ? `<p class="hint" style="font-style:italic;margin-top:8px;">"${esc(prof.catchphrase)}"</p>` : ''}
+    <div class="divider"></div>
+    <p class="hint">📊 ${st.matches} משחקים · ${st.sessions||0} מפגשים · הפרש נטו קריירה: ${diff>=0?'+':''}${diff} · ⭐ ${st.stars||0} ניצחונות נקיים</p>
+    ${best ? `<p class="hint">🌟 המפגש הכי טוב: מפגש #${best.sessionNumber} (${fmtDate(best.date)}) — הפרש ${best.diff>=0?'+':''}${best.diff}, ${best.wins} ניצחונות</p>` : ''}
+    ${rival ? `<p class="hint">⚔️ היריב/ה הכי מוכר/ת: ${esc(rival.name)} (${rival.wins}-${rival.losses} בהיסטוריה)</p>` : ''}
+    ${badges.length ? `<div class="badge-grid" style="margin-top:12px;">${badges.map(b=>`
+      <div class="badge-card"><div class="badge-emoji">${b.emoji}</div><div class="badge-title">${b.title}</div></div>
+    `).join('')}</div>` : ''}
+    <button class="btn accent block" style="margin-top:14px;" onclick="sharePlayerCardImage('${jsAttr(name)}')">📸 שיתוף כרטיס</button>
+  </div>
+  <div class="card">
+    <h2>📈 התקדמות לאורך זמן</h2>
+    <div class="stat-tabs">
+      ${[
+        {id:'net', label:'הפרש נטו'},
+        {id:'rank', label:'מיקום בטבלה'},
+        {id:'errRate', label:'% טעויות'},
+        {id:'clutchPct', label:'% קלאץ׳'},
+      ].map(t=>`<button class="${progressionMetric===t.id?'active':''}" onclick="progressionMetric='${t.id}'; render();">${t.label}</button>`).join('')}
+    </div>
+    <canvas id="progressionChart" height="220"></canvas>
+  </div>`;
+}
+function renderStatsView(){
+  const {players, pairs} = buildGlobalStats();
+  const hasData = Object.keys(players).some(p=>players[p].matches>0);
+  const tabs = [
+    {id:'card', label:'🪪 כרטיס שחקן'},
+    {id:'league', label:'🏆 טבלת ליגה'},
+    {id:'wins', label:'נצחונות אישיים'},
+    {id:'pairs', label:'נצחונות לפי צמדים'},
+    {id:'h2h', label:'⚔️ ראש בראש'},
+    {id:'achievements', label:'🏅 הישגים'},
+    {id:'clutch', label:'⚡ קלאץ׳'},
+    {id:'stars', label:'כוכבים'},
+    {id:'trend', label:'מגמות שיפור'},
+    {id:'fit', label:'התאמת שותפים'},
+  ];
+  let html = `<div class="card">
+    <h2>סטטיסטיקה כוללת</h2>
+    <p class="hint">מבוסס על כל המשחקים שהושלמו בכל המפגשים.</p>
+    <div class="stat-tabs">${tabs.map(t=>`<button class="${statsSubtab===t.id?'active':''}" onclick="setStatsTab('${t.id}')">${t.label}</button>`).join('')}</div>
+  </div>`;
+
+  if(!hasData){
+    html += `<div class="card"><div class="empty"><div class="big">📊</div>עדיין אין מספיק נתונים. שחקו כמה משחקים ותחזרו הנה!</div></div>`;
+    return html;
+  }
+
+  if(statsSubtab==='wins'){
+    const rows = Object.keys(players).filter(p=>players[p].matches>0)
+      .sort((a,b)=> players[b].wins - players[a].wins);
+    html += `<div class="card"><h2>טבלת נצחונות אישית</h2><table class="stat-table">
+      <thead><tr><th>#</th><th>שחקן/ית</th><th>מפגשים</th><th>נצחונות</th><th>משחקים</th><th>% נצחון</th><th>נק׳ +</th><th>נק׳ -</th><th>הפרש</th><th>⭐</th></tr></thead><tbody>
+      ${rows.map((p,i)=>{
+        const st=players[p]; const pct = st.matches? Math.round(st.wins/st.matches*100):0;
+        const diff = st.pos-st.neg;
+        return `<tr class="${i===0?'top1':''}"><td>${i+1}</td><td>${esc(p)}</td><td>${st.sessions||0}</td><td>${st.wins}</td><td>${st.matches}</td><td>${pct}%</td><td class="pos-n">+${st.pos}</td><td class="neg-n">-${st.neg}</td><td>${diff>=0?'+':''}${diff}</td><td>${st.stars||0}</td></tr>`;
+      }).join('')}
+      </tbody></table></div>`;
+  }
+
+  if(statsSubtab==='card'){
+    const names3 = Object.keys(players).filter(p=>players[p].matches>0);
+    if(!selectedCardPlayer || !names3.includes(selectedCardPlayer)) selectedCardPlayer = names3[0]||null;
+    html += `<div class="card"><h2>🪪 כרטיס שחקן</h2>
+      <select onchange="selectedCardPlayer=this.value; render();" style="width:100%;margin-bottom:6px;">
+        ${names3.map(n=>`<option value="${esc(n)}" ${n===selectedCardPlayer?'selected':''}>${esc(n)}</option>`).join('')}
+      </select>
+    </div>`;
+    if(selectedCardPlayer) html += renderPlayerCardView(selectedCardPlayer);
+  }
+  if(statsSubtab==='league'){
+    const table = computeLeagueTable();
+    const medals = ['🥇','🥈','🥉'];
+    html += `<div class="card"><h2>🏆 טבלת ליגה</h2>
+      <p class="hint">3 נקודות על כל ניצחון. בשוויון נקודות, מכריע הפרש הנקודות.</p>
+      <table class="stat-table">
+      <thead><tr><th>#</th><th>שחקן/ית</th><th>משחקים</th><th>ניצחונות</th><th>הפסדים</th><th>הפרש</th><th>נק׳ ליגה</th></tr></thead><tbody>
+      ${table.map((r,i)=>`<tr class="${i===0?'top1':''}"><td>${medals[i]||(i+1)}</td><td>${esc(r.name)}</td><td>${r.played}</td><td>${r.won}</td><td>${r.lost}</td><td>${r.diff>=0?'+':''}${r.diff}</td><td><strong>${r.points}</strong></td></tr>`).join('')}
+      </tbody></table>
+      ${table.length ? `<p class="hint" style="margin-top:10px;">🏆 מוביל/ה כרגע: <strong>${esc(table[0].name)}</strong> עם ${table[0].points} נקודות.</p>` : ''}
+    </div>`;
+  }
+  if(statsSubtab==='h2h'){
+    const h2h = computeHeadToHead();
+    const names2 = Object.keys(players).filter(p=>players[p].matches>0);
+    if(!selectedH2HA || !names2.includes(selectedH2HA)) selectedH2HA = names2[0]||null;
+    if(!selectedH2HB || !names2.includes(selectedH2HB)) selectedH2HB = names2.find(n=>n!==selectedH2HA)||null;
+    const rec = (selectedH2HA && selectedH2HB && h2h[selectedH2HA] && h2h[selectedH2HA][selectedH2HB]) || {wins:0,losses:0};
+    html += `<div class="card"><h2>⚔️ ראש בראש</h2>
+      <p class="hint">כמה פעמים הצד של שחקן א׳ ניצח את הצד של שחקן ב׳ במשחקים שבהם הם עמדו זה מול זה (כולל כששיחקו עם שותפים שונים).</p>
+      <div class="row">
+        <select onchange="selectedH2HA=this.value; render();" style="flex:1;">
+          ${names2.map(n=>`<option value="${esc(n)}" ${n===selectedH2HA?'selected':''}>${esc(n)}</option>`).join('')}
+        </select>
+        <span style="align-self:center;">מול</span>
+        <select onchange="selectedH2HB=this.value; render();" style="flex:1;">
+          ${names2.map(n=>`<option value="${esc(n)}" ${n===selectedH2HB?'selected':''}>${esc(n)}</option>`).join('')}
+        </select>
+      </div>
+      ${selectedH2HA && selectedH2HB && selectedH2HA!==selectedH2HB ? `
+        <div class="mvp-banner" style="margin-top:14px;">
+          <div class="trophy">⚔️</div>
+          <div><div class="name">${esc(selectedH2HA)} ${rec.wins} - ${rec.losses} ${esc(selectedH2HB)}</div>
+          <div class="label">${(rec.wins+rec.losses)===0 ? 'עדיין לא שיחקו זה נגד זה' : (rec.wins>rec.losses ? esc(selectedH2HA)+' מוביל בהיסטוריה' : rec.losses>rec.wins ? esc(selectedH2HB)+' מוביל בהיסטוריה' : 'תיקו מושלם בהיסטוריה')}</div></div>
+        </div>
+      ` : '<p class="hint" style="margin-top:10px;">בחרו שני שחקנים שונים.</p>'}
+    </div>`;
+  }
+  if(statsSubtab==='achievements'){
+    const badges = computeAchievements();
+    html += `<div class="card"><h2>🏅 הישגים</h2>
+      <p class="hint">מבוסס על כל הקריירה בליגה (מינימום 3 משחקים כדי להיכנס לתמונה).</p>
+      ${badges.length ? `<div class="badge-grid">${badges.map(b=>`
+        <div class="badge-card">
+          <div class="badge-emoji">${b.emoji}</div>
+          <div class="badge-title">${b.title}</div>
+          <div class="badge-player">${esc(b.player)}</div>
+          <div class="badge-desc">${esc(b.desc)}</div>
+        </div>
+      `).join('')}</div>` : '<p class="hint">עדיין אין מספיק משחקים לחלוקת תגים.</p>'}
+    </div>`;
+  }
+  if(statsSubtab==='pairs'){
+    const rows = Object.keys(pairs).sort((a,b)=>pairs[b].wins-pairs[a].wins);
+    html += `<div class="card"><h2>נצחונות לפי צמדים</h2><table class="stat-table">
+      <thead><tr><th>#</th><th>צמד</th><th>נצחונות</th><th>משחקים</th><th>% נצחון</th><th>הפרש</th><th>⭐</th></tr></thead><tbody>
+      ${rows.map((k,i)=>{
+        const pr=pairs[k]; const pct = pr.matches?Math.round(pr.wins/pr.matches*100):0;
+        const diff = (pr.pos||0)-(pr.neg||0);
+        return `<tr class="${i===0?'top1':''}"><td>${i+1}</td><td>${esc(pr.players.join(' + '))}</td><td>${pr.wins}</td><td>${pr.matches}</td><td>${pct}%</td><td>${diff>=0?'+':''}${diff}</td><td>${pr.stars||0}</td></tr>`;
+      }).join('')}
+      </tbody></table></div>`;
+  }
+  if(statsSubtab==='clutch'){
+    const cg = computeClutchGlobalStats();
+    const rows = Object.keys(cg.winCounts).sort((a,b)=>cg.winCounts[b]-cg.winCounts[a]);
+    html += `<div class="card">
+      <h2>⚡ ביצועים בלחץ</h2>
+      <p class="hint">${cg.deuceCount} מתוך ${cg.totalMatches} משחקים הגיעו למצב דויס (40-40) או יותר — הרגעים שבהם עצבים באמת נבחנים.</p>
+      <table class="stat-table">
+        <thead><tr><th>#</th><th>שחקן/ית</th><th>ניצחונות במשחקי דויס</th></tr></thead>
+        <tbody>${rows.length ? rows.map((p,i)=>`<tr class="${i===0?'top1':''}"><td>${i+1}</td><td>${esc(p)}</td><td>${cg.winCounts[p]}</td></tr>`).join('') : '<tr><td colspan="3" class="hint">אין עדיין משחקים שהגיעו לדויס.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  }
+  if(statsSubtab==='stars'){
+    const prows = Object.keys(players).filter(p=>players[p].matches>0).sort((a,b)=>players[b].stars-players[a].stars);
+    const prows2 = Object.keys(pairs).sort((a,b)=>pairs[b].stars-pairs[a].stars);
+    html += `<div class="card"><h2>⭐ כוכבים אישיים (ניצחון 40-0)</h2><table class="stat-table">
+      <thead><tr><th>שחקן/ית</th><th>כוכבים</th></tr></thead><tbody>
+      ${prows.map(p=>`<tr><td>${esc(p)}</td><td><span class="badge gold">⭐ ${players[p].stars}</span></td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="card"><h2>⭐ כוכבים לפי צמדים</h2><table class="stat-table">
+      <thead><tr><th>צמד</th><th>כוכבים</th></tr></thead><tbody>
+      ${prows2.map(k=>`<tr><td>${esc(pairs[k].players.join(' + '))}</td><td><span class="badge gold">⭐ ${pairs[k].stars}</span></td></tr>`).join('')}
+      </tbody></table></div>`;
+  }
+  if(statsSubtab==='trend'){
+    const names = Object.keys(players).filter(p=>players[p].matches>0);
+    if(!selectedTrendPlayer || !names.includes(selectedTrendPlayer)) selectedTrendPlayer = names[0];
+    html += `<div class="card"><h2>מגמת נקודות נטו</h2><p class="hint">נקודות נטו (חיוביות פחות שליליות) ממוצע למשחק, לפי מפגש.</p>
+      <select class="player-select" onchange="selectedTrendPlayer=this.value; render();">
+        ${names.map(n=>`<option value="${esc(n)}" ${n===selectedTrendPlayer?'selected':''}>${esc(n)}</option>`).join('')}
+      </select>
+      <canvas id="trendChart" height="180"></canvas>
+    </div>
+    <div class="card"><h2>מגמת אחוז ניצחונות</h2><p class="hint">אחוז הניצחונות של ${esc(selectedTrendPlayer)} בכל מפגש.</p>
+      <canvas id="winRateChart" height="180"></canvas>
+    </div>
+    <div class="card"><h2>השוואה בין כל השחקנים</h2><p class="hint">נקודות נטו ממוצעות למשחק, כל השחקנים יחד לאורך המפגשים.</p>
+      <canvas id="compareChart" height="220"></canvas>
+    </div>`;
+  }
+  if(statsSubtab==='fit'){
+    const names = Object.keys(players).filter(p=>players[p].matches>0);
+    if(!selectedFitPlayer || !names.includes(selectedFitPlayer)) selectedFitPlayer = names[0];
+    html += `<div class="card"><h2>התאמת שותפים</h2><p class="hint">אחוזי ניצחון עם כל שותף/ה ששיחקו יחד לפחות פעם אחת.</p>
+      <select class="player-select" onchange="selectedFitPlayer=this.value; render();">
+        ${names.map(n=>`<option value="${esc(n)}" ${n===selectedFitPlayer?'selected':''}>${esc(n)}</option>`).join('')}
+      </select>
+      <canvas id="fitChart" height="200"></canvas>
+    </div>`;
+  }
+  return html;
+}
+function setStatsTab(t){ statsSubtab=t; render(); }
+
+let trendChartInst=null, fitChartInst=null, winRateChartInst=null, compareChartInst=null, progressionChartInst=null;
+const COMPARE_COLORS = ['#D8EA4B','#E3703C','#1D8A73','#F0C24B','#7CB8E0','#C97BD8','#E86BA0','#8ABF6A','#E0A15C','#6E9BE0'];
+function chartsAvailable(){
+  if(typeof Chart === 'undefined'){
+    document.querySelectorAll('canvas').forEach(c=>{
+      const warn = document.createElement('p');
+      warn.className = 'hint';
+      warn.style.color = 'var(--danger)';
+      warn.textContent = '⚠ לא ניתן לטעון את ספריית הגרפים (Chart.js) — בדקו חיבור אינטרנט ורעננו את הדף.';
+      c.replaceWith(warn);
+    });
+    return false;
+  }
+  return true;
+}
+function afterStatsRender(){
+  if(!chartsAvailable()) return;
+  if(statsSubtab==='card' && selectedCardPlayer){
+    const series = computeProgressionSeries(selectedCardPlayer);
+    const metricConfig = {
+      net: { data: series.net, label:'הפרש נטו', color:'#D8EA4B', reverse:false },
+      rank: { data: series.rank, label:'מיקום בטבלה', color:'#F0C24B', reverse:true },
+      errRate: { data: series.errRate, label:'% טעויות', color:'#E2543B', reverse:false },
+      clutchPct: { data: series.clutchPct, label:'% נקודות בקלאץ׳', color:'#7CB8E0', reverse:false },
+    };
+    const cfg = metricConfig[progressionMetric] || metricConfig.net;
+    try{
+      const ctx = document.getElementById('progressionChart');
+      if(ctx){
+        if(progressionChartInst){ progressionChartInst.destroy(); progressionChartInst=null; }
+        if(series.labels.length){
+          progressionChartInst = new Chart(ctx, {
+            type:'line',
+            data:{ labels: series.labels, datasets:[{ label:cfg.label, data:cfg.data, borderColor:cfg.color, backgroundColor:cfg.color+'26', tension:.3, fill:true, pointBackgroundColor:cfg.color }]},
+            options:{ plugins:{legend:{labels:{color:'#94ADB2'}}}, scales:{
+              x:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}},
+              y:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}, reverse:cfg.reverse, ...(cfg.reverse?{min:1}:{})}
+            }}
+          });
+        }
+      }
+    }catch(e){ console.error('progressionChart error', e); }
+  }
+  if(statsSubtab==='trend' && selectedTrendPlayer){
+    const sessions = allFinishedSessions();
+    const labels = [], data = [], winRateData = [];
+    sessions.forEach(s=>{
+      let pos=0,neg=0,matches=0,wins=0;
+      s.matches.filter(m=>m.finished).forEach(m=>{
+        if(m.individual[selectedTrendPlayer]){
+          matches++; pos+=m.individual[selectedTrendPlayer].pos; neg+=negTotal(m.individual[selectedTrendPlayer]);
+          const winners = m.winner==='A'?m.pairA:m.pairB;
+          if(winners.includes(selectedTrendPlayer)) wins++;
+        }
+      });
+      if(matches>0){
+        labels.push('מפגש '+s.number);
+        data.push(+((pos-neg)/matches).toFixed(2));
+        winRateData.push(Math.round(wins/matches*100));
+      }
+    });
+    try{
+      const ctx = document.getElementById('trendChart');
+      if(ctx){
+        if(trendChartInst){ trendChartInst.destroy(); trendChartInst=null; }
+        trendChartInst = new Chart(ctx, {
+          type:'line',
+          data:{ labels, datasets:[{ label:'נק׳ נטו ממוצע', data, borderColor:'#D8EA4B', backgroundColor:'rgba(216,234,75,.15)', tension:.3, fill:true, pointBackgroundColor:'#1D8A73' }]},
+          options:{ plugins:{legend:{labels:{color:'#94ADB2'}}}, scales:{
+            x:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}},
+            y:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}}
+          }}
+        });
+      }
+    }catch(e){ console.error('trendChart error', e); }
+    try{
+      const ctx2 = document.getElementById('winRateChart');
+      if(ctx2){
+        if(winRateChartInst){ winRateChartInst.destroy(); winRateChartInst=null; }
+        winRateChartInst = new Chart(ctx2, {
+          type:'line',
+          data:{ labels, datasets:[{ label:'% ניצחון', data:winRateData, borderColor:'#E3703C', backgroundColor:'rgba(227,112,60,.15)', tension:.3, fill:true, pointBackgroundColor:'#E3703C' }]},
+          options:{ plugins:{legend:{labels:{color:'#94ADB2'}}}, scales:{
+            x:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}},
+            y:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}, min:0, max:100}
+          }}
+        });
+      }
+    }catch(e){ console.error('winRateChart error', e); }
+    try{
+      const ctx3 = document.getElementById('compareChart');
+      if(ctx3){
+        if(compareChartInst){ compareChartInst.destroy(); compareChartInst=null; }
+        const {players} = buildGlobalStats();
+        const allNames = Object.keys(players).filter(p=>players[p].matches>0);
+        const datasets = allNames.map((n,i)=>{
+          const d = [];
+          sessions.forEach(s=>{
+            let pos=0,neg=0,matches=0;
+            s.matches.filter(m=>m.finished).forEach(m=>{
+              if(m.individual[n]){ matches++; pos+=m.individual[n].pos; neg+=negTotal(m.individual[n]); }
+            });
+            d.push(matches>0 ? +((pos-neg)/matches).toFixed(2) : null);
+          });
+          const color = COMPARE_COLORS[i % COMPARE_COLORS.length];
+          return { label:n, data:d, borderColor:color, backgroundColor:color, tension:.3, spanGaps:true, pointRadius:3 };
+        });
+        compareChartInst = new Chart(ctx3, {
+          type:'line',
+          data:{ labels, datasets },
+          options:{ plugins:{legend:{labels:{color:'#94ADB2', boxWidth:12}}}, scales:{
+            x:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}},
+            y:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}}
+          }}
+        });
+      }
+    }catch(e){ console.error('compareChart error', e); }
+  }
+  if(statsSubtab==='fit' && selectedFitPlayer){
+    const {players} = buildGlobalStats();
+    const partners = players[selectedFitPlayer]?.partners || {};
+    const labels = Object.keys(partners);
+    const data = labels.map(l=> partners[l].matches ? Math.round(partners[l].wins/partners[l].matches*100) : 0);
+    const ctx = document.getElementById('fitChart');
+    if(ctx){
+      if(labels.length===0){
+        const msg = document.createElement('p');
+        msg.className = 'hint';
+        msg.textContent = `${selectedFitPlayer} עדיין לא שיחק/ה עם מספיק שותפים שונים כדי להציג השוואה.`;
+        ctx.replaceWith(msg);
+      } else {
+        try{
+          if(fitChartInst){ fitChartInst.destroy(); fitChartInst=null; }
+          fitChartInst = new Chart(ctx, {
+            type:'bar',
+            data:{ labels, datasets:[{ label:'% נצחון יחד', data, backgroundColor:'#1D8A73', borderRadius:6 }]},
+            options:{ plugins:{legend:{display:false}}, scales:{
+              x:{ticks:{color:'#94ADB2'}, grid:{display:false}},
+              y:{ticks:{color:'#94ADB2'}, grid:{color:'#2C4B53'}, max:100}
+            }}
+          });
+        }catch(e){ console.error('fitChart error', e); }
+      }
+    }
+  }
+}
+
+/* ======================= MANUAL EDIT ======================= */
+function renderManualView(){
+  let html = `<div class="card">
+    <h2>עריכה ידנית</h2>
+    <p class="hint">תיקון תוצאות, ניהול רשימת שחקנים וגיבוי/שחזור נתונים.</p>
+  </div>`;
+
+  html += `<div class="card">
+    <h2>רשימת שחקנים</h2>
+    <p class="hint">מגדר משפיע רק על ניסוח הסיכומים (זכר/נקבה בטקסט), לא על החישובים.</p>
+    ${state.players.length ? state.players.map(p=>`
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span class="chip">${esc(p)}</span>
+        <div class="row" style="align-items:center;">
+          <select onchange="setPlayerGender('${jsAttr(p)}', this.value); render();" style="width:auto;">
+            <option value="" ${!getGender(p)?'selected':''}>לא צוין</option>
+            <option value="M" ${getGender(p)==='M'?'selected':''}>זכר</option>
+            <option value="F" ${getGender(p)==='F'?'selected':''}>נקבה</option>
+          </select>
+          <button class="btn ghost sm" onclick="toggleProfileEdit('${jsAttr(p)}')">🪪 פרופיל</button>
+          <button class="btn danger sm" onclick="deletePlayer('${jsAttr(p)}')" title="מחיקת שחקן">🗑</button>
+        </div>
+      </div>
+      ${editingProfileFor===p ? renderProfileEditForm(p) : ''}
+    `).join('') : '<span class="hint">אין שחקנים עדיין</span>'}
+    <div class="field" style="margin-top:12px;">
+      <div class="row">
+        <input type="text" id="manualNewPlayer" placeholder="שם שחקן חדש" style="flex:1;min-width:140px;">
+        <select id="manualNewPlayerGender" style="width:auto;">
+          <option value="M" selected>זכר</option>
+          <option value="F">נקבה</option>
+        </select>
+        <button class="btn ghost" onclick="manualAddPlayer()">+ הוסף</button>
+      </div>
+    </div>
+  </div>`;
+
+  html += `<div class="card"><h2>גיבוי ושחזור</h2>
+    <div class="row">
+      <button class="btn ghost" onclick="exportData()">⬇ ייצוא גיבוי (JSON)</button>
+      <label class="btn ghost" style="position:relative;overflow:hidden;">
+        ⬆ ייבוא גיבוי
+        <input type="file" accept="application/json" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="importData(event)">
+      </label>
+    </div>
+    <div class="divider"></div>
+    <p class="hint">🛟 בנוסף, לפני כל מחיקה (מפגש/משחק/שחקן) מתבצע גיבוי אוטומטי ברקע — כדי שמחיקה בטעות תמיד תהיה הפיכה.</p>
+    <button class="btn ghost sm" onclick="loadSafetyBackups()">${safetyBackupsLoading?'טוען...':'🛟 הצגת גיבויים אוטומטיים אחרונים'}</button>
+    ${safetyBackupsList.length ? safetyBackupsList.map(b=>`
+      <div class="session-row" style="cursor:default;">
+        <div>
+          <div class="num" style="font-size:14px;">${esc(b.reason||'גיבוי')}</div>
+          <div class="meta">${new Date(b.timestamp).toLocaleString('he-IL')}</div>
+        </div>
+        <button class="btn danger sm" onclick="restoreSafetyBackup('${b.key}')">שחזור</button>
+      </div>
+    `).join('') : ''}
+  </div>`;
+
+  const sessions = state.sessions.slice().sort((a,b)=>b.number-a.number);
+  sessions.forEach(s=>{
+    html += `<div class="card">
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <h2>מפגש #${s.number} · ${fmtDate(s.date)}</h2>
+        <button class="btn danger sm" onclick="deleteSession('${s.id}')">🗑 מחיקת מפגש</button>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>הערות מפגש</label>
+        <textarea rows="2" onchange="updateSessionNotes('${s.id}', this.value)">${esc(s.notes||'')}</textarea>
+      </div>`;
+    if(s.matches.length===0) html += `<p class="hint">אין משחקים במפגש זה.</p>`;
+    s.matches.forEach((m,mi)=>{
+      html += `<div class="manual-edit-item">
+        <div class="row" style="justify-content:space-between;align-items:center;">
+          <strong style="font-family:var(--font-display);">${esc(m.pairA.join('+'))} נגד ${esc(m.pairB.join('+'))}</strong>
+          <div class="row" style="gap:6px;">
+            <span class="badge">${m.finished?'הושלם':'בעיצומו'}</span>
+            <button class="btn ghost sm" onclick="deleteMatch('${s.id}','${m.id}')">🗑 מחק משחק</button>
+          </div>
+        </div>
+        <div class="manual-grid">
+          <div class="field"><label>נקודות ${esc(m.pairA.join('+'))}</label>
+            <input type="number" min="0" value="${m.pointsA}" onchange="manualEditScore('${s.id}','${m.id}','A',this.value)"></div>
+          <div class="field"><label>נקודות ${esc(m.pairB.join('+'))}</label>
+            <input type="number" min="0" value="${m.pointsB}" onchange="manualEditScore('${s.id}','${m.id}','B',this.value)"></div>
+          ${[...m.pairA,...m.pairB].map(p=>`
+          <div class="field"><label>${esc(p)} — חיוביות</label>
+            <input type="number" min="0" value="${m.individual[p].pos}" onchange="manualEditIndiv('${s.id}','${m.id}','${jsAttr(p)}','pos',this.value)"></div>
+          <div class="field"><label>${esc(p)} — טעויות רשת 🥅</label>
+            <input type="number" min="0" value="${m.individual[p].negNet}" onchange="manualEditIndiv('${s.id}','${m.id}','${jsAttr(p)}','negNet',this.value)"></div>
+          <div class="field"><label>${esc(p)} — טעויות זכוכית 🪟</label>
+            <input type="number" min="0" value="${m.individual[p].negGlass}" onchange="manualEditIndiv('${s.id}','${m.id}','${jsAttr(p)}','negGlass',this.value)"></div>
+          `).join('')}
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim);">
+            <input type="checkbox" style="width:auto;" ${m.star?'checked':''} onchange="manualToggleStar('${s.id}','${m.id}',this.checked)"> סימון כוכב (ניצחון נקי)
+          </label>
+        </div>
+      </div>`;
+    });
+    html += `<div class="row" style="justify-content:space-between;align-items:center;margin-top:6px;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim);">
+        <input type="checkbox" style="width:auto;" ${s.finished?'checked':''} onchange="manualToggleFinished('${s.id}',this.checked)"> מפגש הושלם
+      </label>
+    </div></div>`;
+  });
+  return html;
+}
+function deleteSession(sid){
+  const s = state.sessions.find(x=>x.id===sid);
+  if(!s) return;
+  if(!confirm(`למחוק לצמיתות את מפגש #${s.number} ואת כל הנתונים שלו? הפעולה הזו תעדכן את כל הסטטיסטיקות ולא ניתנת לביטול.`)) return;
+  saveSafetyBackup('לפני מחיקת מפגש #'+s.number);
+  state.sessions = state.sessions.filter(x=>x.id!==sid);
+  if(state.currentSessionId===sid) state.currentSessionId=null;
+  if(viewingPastSessionId===sid) viewingPastSessionId=null;
+  saveState();
+  toast('המפגש נמחק');
+  render();
+}
+function deleteMatch(sid, mid){
+  const s = state.sessions.find(x=>x.id===sid);
+  if(!s) return;
+  if(!confirm('למחוק את המשחק הזה מהמפגש? זה יעדכן את הסטטיסטיקות.')) return;
+  saveSafetyBackup('לפני מחיקת משחק ממפגש #'+s.number);
+  s.matches = s.matches.filter(x=>x.id!==mid);
+  saveState();
+  toast('המשחק נמחק');
+  render();
+}
+function manualAddPlayer(){
+  const el = document.getElementById('manualNewPlayer');
+  const genderSel = document.getElementById('manualNewPlayerGender');
+  const name = el.value.trim();
+  if(!name) return;
+  if(!state.players.includes(name)){ state.players.push(name); }
+  if(genderSel && genderSel.value) setPlayerGender(name, genderSel.value);
+  saveState(); toast('נוסף שחקן: '+name); render();
+}
+function deletePlayer(name){
+  const inLiveSession = getActiveSession() && getActiveSession().playersPresent.includes(name) && !getActiveSession().finished;
+  const warn = inLiveSession
+    ? `${name} משתתף/ת במפגש הפעיל כרגע. מחיקה תסיר אותו/ה מרשימת השחקנים לבחירה עתידית, אבל לא תשנה את המפגש הנוכחי או ההיסטוריה. להמשיך?`
+    : `למחוק את ${name} מרשימת השחקנים? זה יסיר אותו/ה מהבחירה למפגשים חדשים, אבל לא ימחק היסטוריה או סטטיסטיקות קיימות שלו/ה. להמשיך?`;
+  if(!confirm(warn)) return;
+  saveSafetyBackup('לפני מחיקת שחקן: '+name);
+  state.players = state.players.filter(p=>p!==name);
+  if(state.genders && state.genders[name] !== undefined) delete state.genders[name];
+  saveState(); toast('השחקן/ית נמחק/ה מהרשימה'); render();
+}
+function toggleProfileEdit(name){
+  editingProfileFor = (editingProfileFor===name) ? null : name;
+  render();
+}
+function renderProfileEditForm(name){
+  const p = getProfile(name);
+  return `<div class="manual-edit-item" style="margin-bottom:14px;">
+    <p class="hint" style="margin-bottom:8px;">אווטאר:</p>
+    <div class="row" style="margin-bottom:10px;">
+      ${AVATAR_OPTIONS.map(a=>`<span class="chip player ${p.avatar===a?'checked':''}" style="font-size:20px;padding:6px 10px;" onclick="updateProfileField('${jsAttr(name)}','avatar','${a}')">${a}</span>`).join('')}
+    </div>
+    <div class="manual-grid">
+      <div class="field"><label>חברת מחבט</label><input type="text" value="${esc(p.racketBrand)}" placeholder="למשל Head, Babolat" onchange="updateProfileField('${jsAttr(name)}','racketBrand', this.value)"></div>
+      <div class="field"><label>דגם מחבט</label><input type="text" value="${esc(p.racketModel)}" placeholder="למשל Delta Pro" onchange="updateProfileField('${jsAttr(name)}','racketModel', this.value)"></div>
+      <div class="field"><label>יד דומיננטית</label>
+        <select onchange="updateProfileField('${jsAttr(name)}','hand', this.value)">
+          <option value="" ${!p.hand?'selected':''}>לא צוין</option>
+          <option value="ימין" ${p.hand==='ימין'?'selected':''}>ימין</option>
+          <option value="שמאל" ${p.hand==='שמאל'?'selected':''}>שמאל</option>
+        </select>
+      </div>
+      <div class="field"><label>צד מועדף במגרש</label>
+        <select onchange="updateProfileField('${jsAttr(name)}','side', this.value)">
+          <option value="" ${!p.side?'selected':''}>לא צוין</option>
+          <option value="ימין" ${p.side==='ימין'?'selected':''}>ימין</option>
+          <option value="שמאל" ${p.side==='שמאל'?'selected':''}>שמאל</option>
+          <option value="גמיש" ${p.side==='גמיש'?'selected':''}>גמיש/ה</option>
+        </select>
+      </div>
+      <div class="field"><label>כינוי</label><input type="text" value="${esc(p.nickname)}" placeholder="למשל 'הפטיש'" onchange="updateProfileField('${jsAttr(name)}','nickname', this.value)"></div>
+      <div class="field"><label>משחק פאדל מ-</label><input type="text" value="${esc(p.since)}" placeholder="למשל 2021" onchange="updateProfileField('${jsAttr(name)}','since', this.value)"></div>
+    </div>
+    <div class="field"><label>ציטוט/סיסמת טרש-טוק אישית</label><input type="text" value="${esc(p.catchphrase)}" placeholder="למשל 'תביאו לי את הכדור'" onchange="updateProfileField('${jsAttr(name)}','catchphrase', this.value)"></div>
+    <button class="btn ghost sm" style="margin-top:8px;" onclick="toggleProfileEdit('${jsAttr(name)}')">סגירה</button>
+  </div>`;
+}
+function updateProfileField(name, field, value){
+  if(!state.profiles) state.profiles = {};
+  if(!state.profiles[name]) state.profiles[name] = Object.assign({}, EMPTY_PROFILE);
+  state.profiles[name][field] = value;
+  saveState(); render();
+}
+function manualEditScore(sid, mid, side, val){
+  const m = state.sessions.find(s=>s.id===sid).matches.find(x=>x.id===mid);
+  const n = Math.max(0, parseInt(val,10)||0);
+  if(side==='A') m.pointsA=n; else m.pointsB=n;
+  recomputeMatchResult(m);
+  saveState(); toast('עודכן');
+}
+function manualEditIndiv(sid, mid, player, field, val){
+  const m = state.sessions.find(s=>s.id===sid).matches.find(x=>x.id===mid);
+  const n = Math.max(0, parseInt(val,10)||0);
+  m.individual[player][field] = n;
+  saveState(); toast('עודכן');
+}
+function manualToggleStar(sid, mid, val){
+  const m = state.sessions.find(s=>s.id===sid).matches.find(x=>x.id===mid);
+  m.star = val; saveState();
+}
+function manualToggleFinished(sid, val){
+  state.sessions.find(s=>s.id===sid).finished = val; saveState(); render();
+}
+function recomputeMatchResult(m){
+  if(m.pointsA===m.pointsB) return;
+  m.winner = m.pointsA>m.pointsB?'A':'B';
+  m.finished = true;
+  const loserPts = m.winner==='A'?m.pointsB:m.pointsA;
+  m.star = (loserPts===0);
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'padel-league-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('קובץ הגיבוי הורד בהצלחה');
+}
+function importData(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.sessions || !data.players) throw new Error('invalid');
+      state = data;
+      saveState();
+      toast('הנתונים שוחזרו בהצלחה');
+      render();
+    }catch(err){ toast('קובץ לא תקין'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ======================= INIT ======================= */
+render();
+</script>
+</body>
+</html>
